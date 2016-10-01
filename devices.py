@@ -1,3 +1,4 @@
+from astral import Astral, Location
 from datetime import datetime
 from udp import UDPStream
 import tornado.ioloop
@@ -14,6 +15,19 @@ ARDUINO_UDP_PORT = 5000
 DELIMITER = ":"
 D = DELIMITER
 
+def getSun():
+    a = Astral()
+    a.solar_depression = 'civil'
+    l = Location()
+    l.name = 'Dolbeau-Mistassini'
+    l.region = 'Canada'
+    l.latitude = 48.9016
+    l.longitude = -72.2156
+    l.timezone = 'America/Montreal'
+    l.elevation = 139
+    sun = l.sun(date=datetime.now().date(), local=True)
+    return sun
+    
 def init_device_loop(context):
     db = context["db"]
     devices = [db[device] for device in db]
@@ -37,7 +51,10 @@ def device_loop(devices):
                     pin = str(device["pin"])
                     if device["mode"] == "digital_out":
                         if all(k in device for k in ("start_time","stop_time")):
-                            start = datetime.strptime(device["start_time"], '%H:%M')
+                            if "dusk_on" in device:
+                                start = getSun()["dusk"]
+                            else:    
+                                start = datetime.strptime(device["start_time"], '%H:%M')
                             stop = datetime.strptime(device["stop_time"], '%H:%M')
                             current = datetime.now()
                             if start.time() < current.time() < stop.time():
@@ -49,5 +66,4 @@ def device_loop(devices):
                             
                             s.send(cmd.encode("ascii"))
                             s.close()
-    #tornado.ioloop.IOLoop.instance().stop()
         
