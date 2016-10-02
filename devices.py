@@ -1,5 +1,5 @@
 from astral import Astral, Location
-from datetime import datetime
+from datetime import datetime, timedelta
 from udp import UDPStream
 import tornado.ioloop
 import socket
@@ -52,7 +52,7 @@ def device_loop(devices):
                     if device["mode"] == "digital_out":
                         if all(k in device for k in ("start_time","stop_time")):
                             if "dusk_on" in device:
-                                start = getSun()["dusk"]
+                                start = getSun()["dusk"] - timedelta(minutes=15)
                             else:    
                                 start = datetime.strptime(device["start_time"], '%H:%M')
                             stop = datetime.strptime(device["stop_time"], '%H:%M')
