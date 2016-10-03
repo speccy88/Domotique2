@@ -36,5 +36,18 @@ sudo systemctl daemon-reload
 sudo systemctl enable dom
 sudo systemctl start dom
 
+#Adding some aliases
+add_alias () {
+    CMD=$1
+    LINE="alias $1=\"$2\""
+    echo "Adding $LINE to .bashrc"
+    FILE=.bashrc
+    grep -q "$LINE" "$FILE" || echo "$LINE" >> "$FILE"
+}
+
+add_alias "start" "sudo systemctl start dom"
+add_alias "stop" "sudo systemctl stop dom"
+add_alias "status" "sudo systemctl status dom"
+
 #End
 echo "All Done!"
