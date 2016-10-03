@@ -27,7 +27,7 @@ def device_loop(devices):
         pin = str(device.pin)
         current_time = datetime.now().time()
         if device.mode == "digital_out":
-            if device.start < current_time < device.stop:
+            if device.start_time < current_time < device.stop_time:
                 cmd = "W" + D + pin + D + "1"
                 print(device.name+" ON")
             else:

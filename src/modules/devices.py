@@ -46,13 +46,13 @@ class Device:
                 self._stop = stringToTime(stop_time)
 
     @property
-    def start(self):
+    def start_time(self):
         if datetime.now().date() != self.sun_date:
             updateStartStopTime()
         return self._start
 
     @property
-    def stop(self):
+    def stop_time(self):
         if datetime.now().date() != self.sun_date:
             updateStartStopTime()
         return self._stop
@@ -60,6 +60,6 @@ class Device:
 if __name__=="__main__":
     d1_data = {"_id": "test", "start_time": "16:00", "stop_time": "sunset"}
     d1 = Device(d1_data)
-    print(d1.start)
-    print(d1.stop)
+    print(d1.start_time)
+    print(d1.stop_time)
     
