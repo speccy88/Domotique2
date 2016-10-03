@@ -1,6 +1,6 @@
 from tornado.ioloop import IOLoop
 import tornado.web
-import devices
+import loop
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
@@ -24,7 +24,7 @@ class ReloadHandler(tornado.web.RequestHandler):
         self.write("reload")
         if self.context["pc"].is_running():
             self.context["pc"].stop()
-            IOLoop.instance().spawn_callback(devices.init_device_loop, self.context)
+            IOLoop.instance().spawn_callback(loop.init_device_loop, self.context)
                 
         
 class Application(tornado.web.Application):
