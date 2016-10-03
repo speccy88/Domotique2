@@ -3,6 +3,10 @@ import tornado.web
 import devices
 
 class MainHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.write("Home Automation Server Running!")
+
+class ExampleHandler(tornado.web.RequestHandler):
     def get(self, *args):
         for arg in args:
             print(arg)
@@ -26,8 +30,9 @@ class ReloadHandler(tornado.web.RequestHandler):
 class Application(tornado.web.Application):
     def __init__(self, context):
         handlers = [
+            (r'/', MainHandler),
             (r"/reload", ReloadHandler, {"context" : context}),
             (r"/stop", StopHandler),
-            (r'/articles/([0-9]{4})/([0-9]{2}).*', MainHandler)
+            #(r'/example/([0-9]{4})/([0-9]{2}).*', ExampleHandler)
         ]
         tornado.web.Application.__init__(self, handlers)
