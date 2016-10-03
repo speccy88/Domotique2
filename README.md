@@ -10,13 +10,23 @@ When done, you should be able to see the server is running by accessing port 800
 
 CouchDB is installed with the start-up script and is used to add the devices to be automated. You can access Futon (web interface of the database) on this url : http://192.168.2.29:5984/_utils/
 
+When starting with a fresh image, it might be a good idea to change the default password with the command "passwd"
+
+You can set a static IP by appending the text below to " /etc/dhcpcd.conf"
+```
+interface eth0
+static ip_address=192.168.0.5/24
+static routers=192.168.0.2
+static domain_name_servers=192.168.0.2
+```
+
 ## Database Format
 todo
 
 ## HTTP API
 todo
 
-## Useful commands to manage the service
+## Systemctl commands to manage the service
 ```
 sudo systemctl start dom    #Start the service
 sudo systemctl stop dom     #Stop the service
