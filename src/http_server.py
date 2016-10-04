@@ -28,7 +28,7 @@ class SetOutputHandler(BaseHandler):
         for device in devices:
             if device.name == name:
                 device.output = state
-                self.write("Device ({}) output is set to {}".format(name, state))
+                self.write("Device ({}) output is set to {}\n".format(name, state))
                 return
         raise tornado.web.HTTPError(404)
 
