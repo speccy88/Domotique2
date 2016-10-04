@@ -24,7 +24,7 @@ static domain_name_servers=192.168.0.2
 [Go to documentation](docs/database.md)
 
 ## HTTP API
-todo
+[Go to documentation](docs/http.md)
 
 ## Systemctl commands to manage the service
 ```
