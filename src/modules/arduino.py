@@ -3,6 +3,8 @@ from udp import UDPStream
 import socket
 
 ARDUINO_UDP_PORT = 5000
+DELIMITER = ":"
+D = DELIMITER
 
 class Arduino(Device):
     def __init__(self, device):
@@ -10,6 +12,19 @@ class Arduino(Device):
         self.ip = self.device["ip"]
         self.pin = self.device["pin"]
         self.mode = self.device["mode"]
+
+    def setPin(self, state):
+        cmd = "W" + D + str(self.pin) + D + str(state)
+        print("Device ({}) command ({})".format(self.name,cmd))
+        self.send(cmd)
+
+    @property
+    def output(self):
+        pass
+
+    @output.setter
+    def output(self, state):
+        self.setPin(state)   
 
     def send(self, cmd):
         udpsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
