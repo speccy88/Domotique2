@@ -21,7 +21,7 @@ static domain_name_servers=192.168.0.2
 ```
 
 ## Database Format
-todo
+[Go to documentation](docs/database.md)
 
 ## HTTP API
 todo
