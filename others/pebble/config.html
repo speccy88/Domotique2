@@ -9,16 +9,14 @@ function f1() {
     var input1 = document.getElementById("input1");
     var p1 = document.getElementById("p1");
     address = input1.value;
-    localStorage.setItem('address',address);
-    //var newAddress = localStorage.getItem('address');
-    var url = window.location.href;
-    p1.innerHTML = url;
+    var options = { address: address};
+    document.location = 'pebblejs://close#' + encodeURIComponent(JSON.stringify(options));
+
 }
 
 function f2() {
     console.log("f2")
     var p1 = document.getElementById("p1");
-    var oldAddress = localStorage.getItem('address');
     p1.innerHTML = oldAddress;
 }
 
