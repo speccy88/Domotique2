@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Configuration</title>
+<script>
+
+function f1() {
+    console.log("f1")
+    var input1 = document.getElementById("input1");
+    var p1 = document.getElementById("p1");
+    address = input1.value;
+    localStorage.setItem('address',address);
+    var newAddress = localStorage.getItem('address');
+    p1.innerHTML = newAddress;
+}
+
+function f2() {
+    console.log("f2")
+    var p1 = document.getElementById("p1");
+    var oldAddress = localStorage.getItem('address');
+    p1.innerHTML = oldAddress;
+}
+
+window.addEventListener("DOMContentLoaded", f2, false);
+
+</script>
+</head>
+<body>
+
+<h1>Pebble domotics config</h1>
+<p>Enter your domotics service IP address and port (e.g. "192.168.0.190:8000")</p>
+<input type="text" id="input1">
+<button type="button" onclick="f1()">Set</button>
+<p>Actual Value:</p>
+<p id="p1"></p>
+</body>
+</html>
