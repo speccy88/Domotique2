@@ -49,13 +49,13 @@ class Device:
     @property
     def start_time(self):
         if datetime.now().date() != self.sun_date:
-            updateStartStopTime()
+            self.updateStartStopTime()
         return self._start
 
     @property
     def stop_time(self):
         if datetime.now().date() != self.sun_date:
-            updateStartStopTime()
+            self.updateStartStopTime()
         return self._stop
 
 if __name__=="__main__":
