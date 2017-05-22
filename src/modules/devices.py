@@ -10,7 +10,8 @@ class Device:
     def __init__(self, device):
         self.device = device
         self.name = device["_id"]
-        self.enabled = device["enabled"]
+        self.enabled = device["device_enabled"]
+        self.time_enabled = device["time_enabled"]
         self.initAstral()
         self.updateStartStopTime()
     
@@ -32,15 +33,15 @@ class Device:
 
     def updateStartStopTime(self):
         self.updateSun()
-        if "start_time" in self.device:
-            start_time = self.device["start_time"]
+        if "time_start" in self.device:
+            start_time = self.device["time_start"]
             if start_time in phase_of_day:
                 self._start = self.sun[start_time].time()
             else:
                 self._start = stringToTime(start_time)
         
-        if "stop_time" in self.device:
-            stop_time = self.device["stop_time"]
+        if "time_stop" in self.device:
+            stop_time = self.device["time_stop"]
             if stop_time in phase_of_day:
                 self._stop = self.sun[stop_time].time()
             else:
@@ -59,7 +60,7 @@ class Device:
         return self._stop
 
 if __name__=="__main__":
-    d1_data = {"_id": "test", "start_time": "16:00", "stop_time": "sunset"}
+    d1_data = {"_id": "test", "time_start": "16:00", "time_stop": "sunset"}
     d1 = Device(d1_data)
     print(d1.start_time)
     print(d1.stop_time)

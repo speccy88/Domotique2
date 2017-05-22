@@ -23,10 +23,18 @@ def device_loop(devices):
     ### Need to implement loop to read input devices
 
     for device in output_devices:
+        device_output = 0
         if device.enabled:
-            current_time = datetime.now().time()
-            if device.start_time < current_time < device.stop_time:
-                device.output = 1
-            else:
-                device.output = 0
+            if device.time_enabled:
+                current_time = datetime.now().time()
+                if device.start_time < current_time < device.stop_time:
+                    device_output = 1
+                else:
+                    device_output = 0
+        else:
+            device_output = 0
+        device.output = device_output
 
+    ### Need to implement loop to read analog devices
+
+    ### Need to implement loop to read DHT22 devices
