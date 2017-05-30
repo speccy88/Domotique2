@@ -129,15 +129,60 @@ void callSubfunction()
   int reply[8];
   bool level = 0;
   int pin = 0;
+  // WRITE DIGITAL OUTPUT PIN
   if(command == "write")
   {
     pin = commands[1].toInt();
-    if(commands[2] == "1")
-      level = 1;
-    else
-      level = 0;
+    level = commands[2].toInt();
 
-    reply[0] = digital.SET(pin, level);
+    if((3 <= pin <= 9) || (13 <= pin <= 19))                    //Discard SPI pins (2(Unknown), 10(CS), 11(MOSI), 12(MISO), 13(SCK)) - Also discard pins that are analog exclusive (20(A6), 21(A7))
+      reply[0] = digital.SET(pin, level);
+    else
+      reply[0] = 99997;                                         //Reply "99997" means the pin number is not valid for digital read/write
+    
+    sprintf(str, "%d", reply[0]);
+  }
+  // READING DIGITAL INPUT PIN
+  else if(command == "read")
+  {
+    pin = commands[1].toInt();
+
+    if((3 <= pin <= 9) || (13 <= pin <= 19))                    //Discard SPI pins (2(Unknown), 10(CS), 11(MOSI), 12(MISO), 13(SCK)) - Also discard pins that are analog exclusive (20(A6), 21(A7))
+      reply[0] = digital.READ(pin);
+    else
+      reply[0] = 99997;                                         //Reply "99997" means the pin number is not valid for digital read/write
+    
+    sprintf(str, "%d", reply[0]);
+  }
+  // READING ANALOG INPUT PIN
+  else if(command == "analog")
+  {
+    //Convert ascii pin number to numerical pin number
+    int aPosition = commands[1].indexOf('a');
+    int APosition = commands[1].indexOf('A');
+    if(aPosition == 0 || APosition == 0)
+    {
+      commands[1].remove(0, 1);
+      pin = commands[1].toInt() + 14;
+      Serial.println(pin);
+    }
+    else
+    {
+      pin = commands[1].toInt();
+      Serial.println(pin);
+    }
+
+    if(0 <= pin <= 7)
+      pin += 14;
+    else if(14 <= pin <= 21)
+      pin = pin;
+    else
+      pin = 0;
+
+    if(14 <= pin <= 21)
+      reply[0] = digital.ANALOG(pin);
+    else
+      reply[0] = 99998;                                         //Reply "99998" means the pin number is not valid for analog input
     
     sprintf(str, "%d", reply[0]);
   }
@@ -151,7 +196,7 @@ void callSubfunction()
   }
   else
   {
-    String("Ca marche PAS...").toCharArray(str, BUFLEN);
+    reply[0] = 99999;                                           //Reply "99999" means the command is not valid
   }  
 }
 

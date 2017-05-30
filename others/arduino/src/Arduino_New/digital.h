@@ -6,9 +6,11 @@
   {
     public:
       digclass();
-      int SET(int pin, bool level);
+      int SET(int pin, int level);
       int READ(int pin);
       int STATUS(int pin);
+      int ANALOG(int pin);
+      int PWM(int pin, int level);
   };
   
   extern digclass digital;
