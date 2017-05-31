@@ -5,17 +5,14 @@
 #include "DHT.h"
 #define DHTTYPE DHT22                                                                  // DHT 22  (AM2302), AM2321
 
-tempclass::tempclass()
-{
-  //uint8_t vu;
-}
+tempclass::tempclass(){}
 
 int tempclass::TEMPERATURE(int pin, String units, int request)
 {
   DHT dht(pin, DHTTYPE);
   dht.begin();
 
-  float temp = 997; // Invalid units
+  float temp = 0;
   
   if(units == "C")
     temp = dht.readTemperature(false);
@@ -24,7 +21,7 @@ int tempclass::TEMPERATURE(int pin, String units, int request)
   else
   {
     Serial.println("ERROR : Invalid Units");
-    return(998);
+    return(9994); // Invalid units
   }
   
   float hum = dht.readHumidity();
@@ -33,7 +30,7 @@ int tempclass::TEMPERATURE(int pin, String units, int request)
   if (isnan(temp) || isnan(hum) || isnan(hi) || temp==997)    // if values are not numbers
   {
     Serial.println("ERROR : Read failed");
-    return(999);
+    return(9995); // Reading error
   }
   else
   {
@@ -68,8 +65,7 @@ int tempclass::TEMPERATURE(int pin, String units, int request)
       break;
       default: // Error
       {
-        Serial.println("ERROR : Invalid request");
-        return(1000);
+        return(9996); // Invalid command
       }
       break;
     }

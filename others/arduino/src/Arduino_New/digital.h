@@ -11,6 +11,8 @@
       int STATUS(int pin);
       int ANALOG(int pin);
       int PWM(int pin, int level);
+      int FREQ(int pin);
+      int TONE(int pin, int level, int duration, String startstop);
   };
   
   extern digclass digital;

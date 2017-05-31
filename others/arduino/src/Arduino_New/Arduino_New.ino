@@ -38,7 +38,7 @@ static int ListenPort = 5000;                                                   
 static byte gwip[] = { 192,168,0,2 };                                                  // Static Gateway IP Address
 static byte subnet[] = { 255,255,255,0 };                                              // Static Subnet Mask
 
-byte Ethernet::buffer[500];                                                           // tcp/ip send and receive buffer
+byte Ethernet::buffer[500];                                                            // tcp/ip send and receive buffer
 
 int level = 0;
 int pin = 0;
@@ -127,18 +127,19 @@ void callSubfunction()
 {
   String command = commands[0];
   int reply[8];
-  bool level = 0;
+  int level = 0;
   int pin = 0;
+  // FIRST COMPARISON ALWAYS FALSE
+  // THIS WILL ALLOW TO DISABLE SOME SUBROUTINES
+  if(1 == 0)
+    pin = commands[1].toInt();
   // WRITE DIGITAL OUTPUT PIN
-  if(command == "write")
+  else if(command == "write")
   {
     pin = commands[1].toInt();
     level = commands[2].toInt();
 
-    if((3 <= pin <= 9) || (13 <= pin <= 19))                    //Discard SPI pins (2(Unknown), 10(CS), 11(MOSI), 12(MISO), 13(SCK)) - Also discard pins that are analog exclusive (20(A6), 21(A7))
-      reply[0] = digital.SET(pin, level);
-    else
-      reply[0] = 99997;                                         //Reply "99997" means the pin number is not valid for digital read/write
+    reply[0] = digital.SET(pin, level);
     
     sprintf(str, "%d", reply[0]);
   }
@@ -146,11 +147,8 @@ void callSubfunction()
   else if(command == "read")
   {
     pin = commands[1].toInt();
-
-    if((3 <= pin <= 9) || (13 <= pin <= 19))                    //Discard SPI pins (2(Unknown), 10(CS), 11(MOSI), 12(MISO), 13(SCK)) - Also discard pins that are analog exclusive (20(A6), 21(A7))
-      reply[0] = digital.READ(pin);
-    else
-      reply[0] = 99997;                                         //Reply "99997" means the pin number is not valid for digital read/write
+    
+    reply[0] = digital.READ(pin);
     
     sprintf(str, "%d", reply[0]);
   }
@@ -162,41 +160,64 @@ void callSubfunction()
     int APosition = commands[1].indexOf('A');
     if(aPosition == 0 || APosition == 0)
     {
-      commands[1].remove(0, 1);
+      commands[1].remove(0, 1);                                                        // Remove first letter of the analog pin
       pin = commands[1].toInt() + 14;
-      Serial.println(pin);
     }
     else
-    {
       pin = commands[1].toInt();
-      Serial.println(pin);
-    }
 
-    if(0 <= pin <= 7)
-      pin += 14;
-    else if(14 <= pin <= 21)
-      pin = pin;
-    else
-      pin = 0;
-
-    if(14 <= pin <= 21)
-      reply[0] = digital.ANALOG(pin);
-    else
-      reply[0] = 99998;                                         //Reply "99998" means the pin number is not valid for analog input
+    reply[0] = digital.ANALOG(pin);
     
     sprintf(str, "%d", reply[0]);
   }
+  // WRITE ANALOG OUTPUT PIN (PWM)
+  // Command[3] shoul be equal to maximum of your scale
+  else if(command == "pwm")
+  {
+    pin = commands[1].toInt();
+    level = commands[2].toInt();
+
+    reply[0] = digital.PWM(pin, (level*commands[3].toInt()));                                     // Convert data from 0-100% to 0-255
+
+    sprintf(str, "%d", reply[0]);
+  }
+  // READ PIN FREQUENCY in Hz
+  else if(command == "freq")
+  {
+    pin = commands[1].toInt();
+
+    wdt_reset();                                                                                  // Exceptionally reset watchdog before going into the frequency count function to prevent unwanted reset
+                                                                                                  // Each frequency count times out after 2s, so should be ok 
+    reply[0] = digital.FREQ(pin);
+
+    sprintf(str, "%d", reply[0]);
+  }
+  // MAKE TONE ON DIGITAL PIN
+  else if(command == "tone")
+  {
+    pin = commands[1].toInt();
+    level = commands[2].toInt();
+
+    reply[0] = digital.TONE(pin, level, commands[3].toInt(), commands[4]);
+
+    sprintf(str, "%d", reply[0]);
+  }
+  // READ TEMPERATUR, HUMIDITY AND HEAT INDEX USING DHT22
   else if(command == "temp")
   {
     pin = commands[1].toInt();
+    
     reply[0] = temp.TEMPERATURE(pin, commands[2], 1);
     reply[1] = temp.TEMPERATURE(pin, commands[2], 2);
     reply[2] = temp.TEMPERATURE(pin, commands[2], 3);
+    
     sprintf(str, "%d,%d,%d", reply[0], reply[1], reply[2]);
   }
   else
   {
-    reply[0] = 99999;                                           //Reply "99999" means the command is not valid
+    reply[0] = 9999;                                                                   //Reply "99999" means the command is not valid
+
+    sprintf(str, "%d", reply[0]);
   }  
 }
 
