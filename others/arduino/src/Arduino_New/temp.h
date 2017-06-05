@@ -1,7 +1,6 @@
 #ifndef temp_h
   #define temp_h
   
-  
   class tempclass
   {
     public:

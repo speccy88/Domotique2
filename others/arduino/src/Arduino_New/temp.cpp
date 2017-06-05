@@ -1,5 +1,4 @@
 #include "Arduino.h"
-#include <EEPROM.h>
 #include "temp.h"
 
 #include "DHT.h"

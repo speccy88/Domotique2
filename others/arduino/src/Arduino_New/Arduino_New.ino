@@ -5,9 +5,8 @@
 
 #include "digital.h"
 #include "temp.h"
-
-#include "DHT.h"
-#define DHTTYPE DHT22                                                                  // DHT 22  (AM2302), AM2321
+#include "pressure.h"
+#include "stgc.h"
 
 #define BUFLEN 32                                                                      // Define length of the reply string
 
@@ -38,7 +37,8 @@ static int ListenPort = 5000;                                                   
 static byte gwip[] = { 192,168,0,2 };                                                  // Static Gateway IP Address
 static byte subnet[] = { 255,255,255,0 };                                              // Static Subnet Mask
 
-byte Ethernet::buffer[500];                                                            // tcp/ip send and receive buffer
+byte Ethernet::buffer[100];                                                            // tcp/ip send and receive buffer
+//byte Ethernet::buffer[500];                                                            // tcp/ip send and receive buffer
 
 int level = 0;
 int pin = 0;
@@ -202,7 +202,7 @@ void callSubfunction()
 
     sprintf(str, "%d", reply[0]);
   }
-  // READ TEMPERATUR, HUMIDITY AND HEAT INDEX USING DHT22
+  // READ TEMPERATURE, HUMIDITY AND HEAT INDEX USING DHT22
   else if(command == "temp")
   {
     pin = commands[1].toInt();
@@ -213,9 +213,26 @@ void callSubfunction()
     
     sprintf(str, "%d,%d,%d", reply[0], reply[1], reply[2]);
   }
+  // READ BAROMETRIC PRESSURE USING BMP280
+  else if(command == "pres")
+  {
+    pin = commands[1].toInt(); //pin is the I2C address or CS pin for the SPI version
+    level = commands[2].toInt(); //level determines I2C=0 or SPI=1
+
+    reply[0] = pressure.PRES(pin);
+    
+    sprintf(str, "%d", reply[0]);
+  }
+  // READ SINGLE TRACK GRAY CODE ENCODER
+  else if(command == "stgc")
+  {
+    reply[0] = STGC.READ(commands[1].toInt(), commands[2].toInt(), commands[3].toInt(), commands[4].toInt(), commands[5].toInt());
+    
+    sprintf(str, "%d", reply[0]);
+  }
   else
   {
-    reply[0] = 9999;                                                                   //Reply "99999" means the command is not valid
+    reply[0] = 9999;                                                                   //Reply "9999" means the command is not valid
 
     sprintf(str, "%d", reply[0]);
   }  

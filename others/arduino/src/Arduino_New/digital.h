@@ -1,7 +1,6 @@
 #ifndef digital_h
   #define digital_h
   
-  
   class digclass
   {
     public:

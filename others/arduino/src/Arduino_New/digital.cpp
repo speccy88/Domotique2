@@ -1,7 +1,5 @@
 #include "Arduino.h"
-#include <EEPROM.h>
 #include "digital.h"
-
 
 digclass::digclass(){}
 
