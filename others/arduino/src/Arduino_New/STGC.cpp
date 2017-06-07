@@ -4,7 +4,7 @@
 int pins[5];
 int index;
 
-// Orientation lookup table , 0 and 31srt indexes are invalid
+// Orientation lookup table , 0 and 31st indexes are invalid and returns "-1"
 int table[] = { -1,   0,   72,  12,  144, 132,   84,  120,
                216, 348,  204,  24,  156, 168,  192,  180,
                288, 300,   60,  48,  276, 312,   96,  108,

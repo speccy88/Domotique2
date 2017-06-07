@@ -7,6 +7,7 @@
 #include "temp.h"
 #include "pressure.h"
 #include "stgc.h"
+#include "OLED128x64.h"
 
 #define BUFLEN 32                                                                      // Define length of the reply string
 
@@ -24,14 +25,29 @@ static int ListenPort = 5000;                                                   
 #ifdef House
   static byte myip[] = { 192,168,0,6 };                                                // Static IP Address
   static byte mymac[] = { 0xFF,0xFF,0xFF,0xFF,0xFF,0x01 };                             // Static MAC Address - MUST NOT have 2 identical MAC address on same network
+  #define enable_basic
+  #define enable_temp
+  #define enable_baro
+  #define enable_expander
+  #define enable_STGC
 #endif
 #ifdef Garage
   static byte myip[] = { 192,168,0,7 };                                                // Static IP Address
   static byte mymac[] = { 0xFF,0xFF,0xFF,0xFF,0xFF,0x02 };                             // Static MAC Address - MUST NOT have 2 identical MAC address on same network
+  #define enable_basic
+  #define enable_temp
+  #define enable_baro
+  #define enable_expander
+  #define enable_STGC
 #endif
 #ifdef Pool
   static byte myip[] = { 192,168,0,8 };                                                // Static IP Address
   static byte mymac[] = { 0xFF,0xFF,0xFF,0xFF,0xFF,0x03 };                             // Static MAC Address - MUST NOT have 2 identical MAC address on same network
+  #define enable_basic
+  #define enable_temp
+  #define enable_baro
+  #define enable_expander
+  #define enable_STGC
 #endif
 
 static byte gwip[] = { 192,168,0,2 };                                                  // Static Gateway IP Address
@@ -160,7 +176,7 @@ void callSubfunction()
     int APosition = commands[1].indexOf('A');
     if(aPosition == 0 || APosition == 0)
     {
-      commands[1].remove(0, 1);                                                        // Remove first letter of the analog pin
+      commands[1].remove(0, 1);                                                                   // Remove first letter of the analog pin
       pin = commands[1].toInt() + 14;
     }
     else
@@ -228,6 +244,12 @@ void callSubfunction()
   {
     reply[0] = STGC.READ(commands[1].toInt(), commands[2].toInt(), commands[3].toInt(), commands[4].toInt(), commands[5].toInt());
     
+    sprintf(str, "%d", reply[0]);
+  }
+  else if(command == "oled")
+  {
+    reply[0] = OLED.SEND(commands[1], commands[2], commands[3], commands[4], commands[5]);
+
     sprintf(str, "%d", reply[0]);
   }
   else
