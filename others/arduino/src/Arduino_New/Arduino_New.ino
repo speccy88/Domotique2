@@ -6,6 +6,7 @@
 #include "digital.h"
 #include "temp.h"
 #include "pressure.h"
+#include "expander.h"
 #include "stgc.h"
 #include "OLED128x64.h"
 
@@ -23,31 +24,49 @@ static int ListenPort = 5000;                                                   
 
 //Set IP address and MAC according to selected defined controller
 #ifdef House
+  #define board_OK
   static byte myip[] = { 192,168,0,6 };                                                // Static IP Address
   static byte mymac[] = { 0xFF,0xFF,0xFF,0xFF,0xFF,0x01 };                             // Static MAC Address - MUST NOT have 2 identical MAC address on same network
-  #define enable_basic
+  #define enable_digital
+  #define enable_analogin
+  //#define enable_analogout
+  //#define enable_frequency
+  //#define enable_tone
   #define enable_temp
-  #define enable_baro
-  #define enable_expander
-  #define enable_STGC
+  //#define enable_baro
+  //#define enable_expander
+  //#define enable_stgc
+  #define enable_oled
 #endif
 #ifdef Garage
+  #define board_OK
   static byte myip[] = { 192,168,0,7 };                                                // Static IP Address
   static byte mymac[] = { 0xFF,0xFF,0xFF,0xFF,0xFF,0x02 };                             // Static MAC Address - MUST NOT have 2 identical MAC address on same network
-  #define enable_basic
-  #define enable_temp
-  #define enable_baro
-  #define enable_expander
-  #define enable_STGC
+  #define enable_digital
+  //#define enable_analogin
+  //#define enable_analogout
+  //#define enable_frequency
+  #define enable_tone
+  //#define enable_temp
+  //#define enable_baro
+  //#define enable_expander
+  //#define enable_stgc
+  //#define enable_oled
 #endif
 #ifdef Pool
+  #define board_OK
   static byte myip[] = { 192,168,0,8 };                                                // Static IP Address
   static byte mymac[] = { 0xFF,0xFF,0xFF,0xFF,0xFF,0x03 };                             // Static MAC Address - MUST NOT have 2 identical MAC address on same network
-  #define enable_basic
-  #define enable_temp
-  #define enable_baro
-  #define enable_expander
-  #define enable_STGC
+  //#define enable_basic
+  //#define enable_temp
+  //#define enable_baro
+  //#define enable_expander
+  //#define enable_STGC
+#endif
+
+#ifdef board_OK
+#else
+  #error("Invalid board selection, please adjust defines in IP selector section above");
 #endif
 
 static byte gwip[] = { 192,168,0,2 };                                                  // Static Gateway IP Address
@@ -64,7 +83,7 @@ int delimiter_qty = 0;
 String commands[10];
 
 char replyUDP[BUFLEN];
-int SourcePort;                                                                        // Source port message came from in order to reply
+int SourcePort;                                                                                    // Source port message came from in order to reply
 
 char str[BUFLEN];
 
@@ -142,6 +161,7 @@ void parseData(String stringdata)
 void callSubfunction()
 {
   String command = commands[0];
+  command.toLowerCase();
   int reply[8];
   int level = 0;
   int pin = 0;
@@ -149,121 +169,228 @@ void callSubfunction()
   // THIS WILL ALLOW TO DISABLE SOME SUBROUTINES
   if(1 == 0)
     pin = commands[1].toInt();
-  // WRITE DIGITAL OUTPUT PIN
-  else if(command == "write")
-  {
-    pin = commands[1].toInt();
-    level = commands[2].toInt();
 
-    reply[0] = digital.SET(pin, level);
-    
-    sprintf(str, "%d", reply[0]);
-  }
-  // READING DIGITAL INPUT PIN
-  else if(command == "read")
-  {
-    pin = commands[1].toInt();
-    
-    reply[0] = digital.READ(pin);
-    
-    sprintf(str, "%d", reply[0]);
-  }
-  // READING ANALOG INPUT PIN
-  else if(command == "analog")
-  {
-    //Convert ascii pin number to numerical pin number
-    int aPosition = commands[1].indexOf('a');
-    int APosition = commands[1].indexOf('A');
-    if(aPosition == 0 || APosition == 0)
+  // DIGITAL INPUTS AND OUTPUTS
+  #ifdef enable_digital
+    // WRITE DIGITAL OUTPUT PIN
+    else if(command == "write")
     {
-      commands[1].remove(0, 1);                                                                   // Remove first letter of the analog pin
-      pin = commands[1].toInt() + 14;
-    }
-    else
       pin = commands[1].toInt();
+      level = commands[2].toInt();
+  
+      reply[0] = digital.SET(pin, level);
+      
+      sprintf(str, "%d", reply[0]);
+    }
+    // READING DIGITAL INPUT PIN
+    else if(command == "read")
+    {
+      pin = commands[1].toInt();
+      
+      reply[0] = digital.READ(pin);
+      
+      sprintf(str, "%d", reply[0]);
+    }
+  #else
+    else if(command == "write" || command == "read")
+    {
+      reply[0] = 9998;                                                                               //Reply "9998" means the command is not activated (defined in current device)
+      sprintf(str, "%d", reply[0]);
+    }
+  #endif
+  
+  //ANALOG INPUTS
+  #ifdef enable_analogin
+    // READING ANALOG INPUT PIN
+    else if(command == "analog")
+    {
+      //Convert ascii pin number to numerical pin number
+      int aPosition = commands[1].indexOf('a');
+      //int APosition = commands[1].indexOf('A');
+      if(aPosition == 0)// || APosition == 0)
+      {
+        commands[1].remove(0, 1);                                                                  // Remove first letter of the analog pin
+        pin = commands[1].toInt() + 14;
+      }
+      else
+        pin = commands[1].toInt();
+  
+      reply[0] = digital.ANALOG(pin);
+      sprintf(str, "%d", reply[0]);
+    }
+  #else
+    else if(command == "analog")
+    {
+      reply[0] = 9998;                                                                               //Reply "9998" means the command is not activated (defined in current device)
+      sprintf(str, "%d", reply[0]);
+    }
+  #endif
+        
+  // ANALOG OUTPUTS (PWM)
+  #ifdef enable_analogout
+    // WRITE ANALOG OUTPUT PIN (PWM)
+    // Command[3] should be equal to maximum of your scale (100 for percent, 255 8bits, etc.)
+    else if(command == "pwm")
+    {
+      pin = commands[1].toInt();
+      level = commands[2].toInt();
+  
+      reply[0] = digital.PWM(pin, (level*commands[3].toInt()));                                    // Convert data from 0-100% to 0-255
+      sprintf(str, "%d", reply[0]);
+    }
+  #else
+    else if(command == "pwm")
+    {
+      reply[0] = 9998;                                                                             //Reply "9998" means the command is not activated (defined in current device)
+      sprintf(str, "%d", reply[0]);
+    }
+  #endif
 
-    reply[0] = digital.ANALOG(pin);
+  // FREQUENCY COUNTER
+  #ifdef enable_frequency    
+    // READ PIN FREQUENCY in Hz
+    else if(command == "freq")
+    {
+      pin = commands[1].toInt();
+  
+      wdt_reset();                                                                                 // Exceptionally reset watchdog before going into the frequency count function to prevent unwanted reset
+                                                                                                   // Each frequency count times out after 2s, so should be ok 
+      reply[0] = digital.FREQ(pin);
+      sprintf(str, "%d", reply[0]);
+    }
+  #else
+    else if(command == "freq")
+    {
+      reply[0] = 9998;                                                                             //Reply "9998" means the command is not activated (defined in current device)
+      sprintf(str, "%d", reply[0]);
+    }
+  #endif
     
-    sprintf(str, "%d", reply[0]);
-  }
-  // WRITE ANALOG OUTPUT PIN (PWM)
-  // Command[3] shoul be equal to maximum of your scale
-  else if(command == "pwm")
-  {
-    pin = commands[1].toInt();
-    level = commands[2].toInt();
+  // TONE GENERATOR
+  #ifdef enable_tone
+    // MAKE TONE ON DIGITAL PIN
+    else if(command == "tone")
+    {
+      pin = commands[1].toInt();
+      level = commands[2].toInt();
+  
+      reply[0] = digital.TONE(pin, level, commands[3].toInt(), commands[4]);
+      sprintf(str, "%d", reply[0]);
+    }
+  #else
+    else if(command == "tone")
+    {
+      reply[0] = 9998;                                                                             //Reply "9998" means the command is not activated (defined in current device)
+      sprintf(str, "%d", reply[0]);
+    }
+  #endif
 
-    reply[0] = digital.PWM(pin, (level*commands[3].toInt()));                                     // Convert data from 0-100% to 0-255
+  // GPIO EXPANDER
+  #ifdef enable_expander
+    // GPIO EXPANDER BASED ON PCF8575 (or PCF8574 with some modifications)
+    else if(command == "expwrite")
+    {
+      pin = commands[1].toInt();
+      level = commands[2].toInt();
+  
+      reply[0] = expander.SET(pin, level, commands[3].toInt());
+      sprintf(str, "%d", reply[0]);
+    }
+    else if(command == "expread")
+    {
+      pin = commands[1].toInt();
+        
+      reply[0] = expander.READ(pin, commands[3].toInt());
+      sprintf(str, "%d", reply[0]);
+    }
+  #else
+    else if(command == "tone")
+    {
+      reply[0] = 9998;                                                                             //Reply "9998" means the command is not activated (defined in current device)
+      sprintf(str, "%d", reply[0]);
+    }
+  #endif
 
-    sprintf(str, "%d", reply[0]);
-  }
-  // READ PIN FREQUENCY in Hz
-  else if(command == "freq")
-  {
-    pin = commands[1].toInt();
+  // TEMPERATURE/HUMIDITY
+  #ifdef enable_temp
+    // READ TEMPERATURE, HUMIDITY AND HEAT INDEX USING DHT22
+    else if(command == "temp")
+    {
+      pin = commands[1].toInt();
+      
+      reply[0] = temp.TEMPERATURE(pin, commands[2], 1);
+      reply[1] = temp.TEMPERATURE(pin, commands[2], 2);
+      reply[2] = temp.TEMPERATURE(pin, commands[2], 3);
+      sprintf(str, "%d,%d,%d", reply[0], reply[1], reply[2]);
+    }
+  #else
+    else if(command == "temp")
+    {
+      reply[0] = 9998;                                                                             //Reply "9998" means the command is not activated (defined in current device)
+      sprintf(str, "%d", reply[0]);
+    }
+  #endif
 
-    wdt_reset();                                                                                  // Exceptionally reset watchdog before going into the frequency count function to prevent unwanted reset
-                                                                                                  // Each frequency count times out after 2s, so should be ok 
-    reply[0] = digital.FREQ(pin);
+  // BAROMETRIC PRESSURE
+  #ifdef enable_baro
+    // READ BAROMETRIC PRESSURE USING BMP280
+    else if(command == "pres")
+    {
+      pin = commands[1].toInt(); //pin is the I2C address or CS pin for the SPI version
+      level = commands[2].toInt(); //level determines I2C=0 or SPI=1
+  
+      reply[0] = pressure.PRES(pin);
+      sprintf(str, "%d", reply[0]);
+    }
+  #else
+    else if(command == "pres")
+    {
+      reply[0] = 9998;                                                                             //Reply "9998" means the command is not activated (defined in current device)
+      sprintf(str, "%d", reply[0]);
+    }
+  #endif
+  
+  // STGC DECODER
+  #ifdef enable_stgc
+    // READ SINGLE TRACK GRAY CODE ENCODER
+    else if(command == "stgc")
+    {
+      reply[0] = STGC.READ(commands[1].toInt(), commands[2].toInt(), commands[3].toInt(), commands[4].toInt(), commands[5].toInt());
+      sprintf(str, "%d", reply[0]);
+    }
+  #else
+    else if(command == "stgc")
+    {
+      reply[0] = 9998;                                                                             //Reply "9998" means the command is not activated (defined in current device)
+      sprintf(str, "%d", reply[0]);
+    }
+  #endif
 
-    sprintf(str, "%d", reply[0]);
-  }
-  // MAKE TONE ON DIGITAL PIN
-  else if(command == "tone")
-  {
-    pin = commands[1].toInt();
-    level = commands[2].toInt();
-
-    reply[0] = digital.TONE(pin, level, commands[3].toInt(), commands[4]);
-
-    sprintf(str, "%d", reply[0]);
-  }
-  // READ TEMPERATURE, HUMIDITY AND HEAT INDEX USING DHT22
-  else if(command == "temp")
-  {
-    pin = commands[1].toInt();
-    
-    reply[0] = temp.TEMPERATURE(pin, commands[2], 1);
-    reply[1] = temp.TEMPERATURE(pin, commands[2], 2);
-    reply[2] = temp.TEMPERATURE(pin, commands[2], 3);
-    
-    sprintf(str, "%d,%d,%d", reply[0], reply[1], reply[2]);
-  }
-  // READ BAROMETRIC PRESSURE USING BMP280
-  else if(command == "pres")
-  {
-    pin = commands[1].toInt(); //pin is the I2C address or CS pin for the SPI version
-    level = commands[2].toInt(); //level determines I2C=0 or SPI=1
-
-    reply[0] = pressure.PRES(pin);
-    
-    sprintf(str, "%d", reply[0]);
-  }
-  // READ SINGLE TRACK GRAY CODE ENCODER
-  else if(command == "stgc")
-  {
-    reply[0] = STGC.READ(commands[1].toInt(), commands[2].toInt(), commands[3].toInt(), commands[4].toInt(), commands[5].toInt());
-    
-    sprintf(str, "%d", reply[0]);
-  }
-  else if(command == "oled")
-  {
-    reply[0] = OLED.SEND(commands[1], commands[2], commands[3], commands[4], commands[5]);
-
-    sprintf(str, "%d", reply[0]);
-  }
+  // OLED DISPLAY
+  #ifdef enable_oled
+    // OLED DISPLAY USING SSD1309 128x64 (maybe 32 later)
+    else if(command == "oled")
+    {
+      reply[0] = OLED.SEND64(commands[1], commands[2], commands[3], commands[4], commands[5]);
+      sprintf(str, "%d", reply[0]);
+    }
+  #else
+    else if(command == "oled")
+    {
+      reply[0] = 9998;                                                                             //Reply "9998" means the command is not activated (defined in current device)
+      sprintf(str, "%d", reply[0]);
+    }
+  #endif
+  
   else
   {
-    reply[0] = 9999;                                                                   //Reply "9999" means the command is not valid
-
+    reply[0] = 9999;                                                                               //Reply "9999" means the command is not valid
     sprintf(str, "%d", reply[0]);
   }  
 }
 
 void UDPreply()
 {
-  
-
   strcpy(replyUDP, str);
 
   #ifdef DEBUG

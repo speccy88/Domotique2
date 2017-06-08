@@ -64,7 +64,7 @@ int tempclass::TEMPERATURE(int pin, String units, int request)
       break;
       default: // Error
       {
-        return(9996); // Invalid command
+        return(9991); // Invalid command
       }
       break;
     }

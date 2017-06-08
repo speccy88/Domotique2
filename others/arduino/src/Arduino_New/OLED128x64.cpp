@@ -12,7 +12,7 @@ SSD1306AsciiWire oled;
 
 oledclass::oledclass(){}
 
-int oledclass::SEND(String Line1, String Line2, String Line3, String Line4, String Line5)
+int oledclass::SEND64(String Line1, String Line2, String Line3, String Line4, String Line5)
 {
   Wire.begin();         
   oled.begin(&Adafruit128x64, I2C_ADDRESS);

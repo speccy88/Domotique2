@@ -5,7 +5,7 @@
   {
     public:
       oledclass();
-      int SEND(String Line1, String Line2, String Line3, String Line4, String Line5);
+      int SEND64(String Line1, String Line2, String Line3, String Line4, String Line5);
   };
   
   extern oledclass OLED;
