@@ -1,3 +1,6 @@
+//PINOUT:
+//SDA = A4
+//SCL = A5
 #include "Arduino.h"
 #include "OLED128x64.h"
 
@@ -27,7 +30,7 @@ int oledclass::SEND64(String Line1, String Line2, String Line3, String Line4, St
   oled.println(Line4);
   oled.set1X();
   oled.println(Line5);
-  return(1234);
+  return(1);
 }
 
 oledclass OLED = oledclass();

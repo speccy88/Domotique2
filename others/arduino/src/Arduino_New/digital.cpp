@@ -76,14 +76,14 @@ int digclass::FREQ(int pin)
   if((3 <= pin <= 9) || (13 <= pin <= 19))                   //Discard SPI pins (2(Unknown), 10(CS), 11(MOSI), 12(MISO), 13(SCK)) - Also discard pins that are analog exclusive (20(A6), 21(A7))
   {
     pinMode(pin,INPUT);
-    Htime = pulseIn(pin,HIGH);                                 //Read high time in microseconds (timeout default = 1s)
-    Ltime = pulseIn(pin,LOW);                                  //Read low time in microseconds (timeout default = 1s)
+    Htime = pulseIn(pin,HIGH);                               //Read high time in microseconds (timeout default = 1s)
+    Ltime = pulseIn(pin,LOW);                                //Read low time in microseconds (timeout default = 1s)
 
     TotalTime = Htime+Ltime;
 
     if(TotalTime > 0)
     {
-      frequency = (1000000/(Htime+Ltime))*10;                     //Calculate frequency * 10
+      frequency = (1000000/(Htime+Ltime))*10;                //Calculate frequency * 10
       return(frequency);
     }
     else

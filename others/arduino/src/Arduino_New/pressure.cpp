@@ -44,7 +44,7 @@ int presclass::PRES(int pin)
   if (!bmp.begin())  
   {
     Serial.println("Could not find a valid BMP280 sensor, check wiring!");
-    return(9992); //
+    return(9992); //Invalid sensor or not found
   }
 
   pres = bmp.readPressure();

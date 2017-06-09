@@ -14,7 +14,7 @@ int gpioclass::SET(int pin, int level, int address)
 {
   hex = address + 32;
   pcf8575.begin(hex); //0x20 to 0x27
-  if(0 <= pin <= 15)                                         //Pin validation
+  if(0 <= pin <= 7 || 10 <= pin <= 17)                       //Pin validation
   {
     pcf8575.pinMode(pin, OUTPUT);
     pcf8575.digitalWrite(pin, level);
@@ -28,7 +28,7 @@ int gpioclass::READ(int pin, int address)
 {
   hex = address + 32;
   pcf8575.begin(0x20); //0x20 to 0x27
-  if(0 <= pin <= 15)                                         //Pin validation
+  if(0 <= pin <= 7 || 10 <= pin <= 17)                       //Pin validation
   {
     pcf8575.pinMode(pin, INPUT);
     return((int)pcf8575.digitalRead(pin));
@@ -41,7 +41,7 @@ int gpioclass::STATUS(int pin, int address)
 {
   hex = address + 32;
   pcf8575.begin(0x20); //0x20 to 0x27
-  if(0 <= pin <= 15)                                         //Pin validation
+  if(0 <= pin <= 7 || 10 <= pin <= 17)                       //Pin validation
   {
     return((int)pcf8575.digitalRead(pin));
   }
