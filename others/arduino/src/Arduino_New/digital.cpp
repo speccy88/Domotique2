@@ -1,69 +1,70 @@
 #include "Arduino.h"
 #include "digital.h"
 
+#include "error_codes.h"                                                               // Includes error codes and pins definitions (min/max pin numbers)
+
 digclass::digclass(){}
 
 int digclass::SET(int pin, int level)
 {
-  if((3 <= pin <= 9) || (13 <= pin <= 19))                   //Discard SPI pins (2(Unknown), 10(CS), 11(MOSI), 12(MISO), 13(SCK)) - Also discard pins that are analog exclusive (20(A6), 21(A7))
+  if((dig_lo_min <= pin <= dig_lo_max) || (dig_hi_min <= pin <= dig_hi_max))
   {
     pinMode(pin, OUTPUT);
     digitalWrite(pin, level);
     return((int)digitalRead(pin));
   }
   else
-    return(9997);                                            //Reply "9997" means the pin number is not valid for digital read/write
+    return(ERROR_INVALID_DIGITAL_PIN);
 }
 
 int digclass::READ(int pin)
 {
-  if((3 <= pin <= 9) || (13 <= pin <= 19))                   //Discard SPI pins (2(Unknown), 10(CS), 11(MOSI), 12(MISO), 13(SCK)) - Also discard pins that are analog exclusive (20(A6), 21(A7))
+  if((dig_lo_min <= pin <= dig_lo_max) || (dig_hi_min <= pin <= dig_hi_max))
   {
     pinMode(pin, INPUT);
     return((int)digitalRead(pin));
   }
   else
-    return(9997);                                            //Reply "9997" means the pin number is not valid for digital read/write
+    return(ERROR_INVALID_DIGITAL_PIN);
 }
 
 int digclass::STATUS(int pin)
 {
-  if((3 <= pin <= 9) || (13 <= pin <= 19))                   //Discard SPI pins (2(Unknown), 10(CS), 11(MOSI), 12(MISO), 13(SCK)) - Also discard pins that are analog exclusive (20(A6), 21(A7))
-  {
+  if((dig_lo_min <= pin <= dig_lo_max) || (dig_hi_min <= pin <= dig_hi_max))
     return((int)digitalRead(pin));
-  }
   else
-    return(9997);                                            //Reply "9997" means the pin number is not valid for digital read/write
+    return(ERROR_INVALID_DIGITAL_PIN);
 }
 
 int digclass::ANALOG(int pin)
 {
-  if(0 <= pin <= 7)
+  if(analog_a0 <= pin <= analog_a7)
     pin += 14;
 
-  if(14 <= pin <= 21)
+  if(analog_min <= pin <= analog_max)
     return((int)analogRead(pin));
   else
-    return(9996);                                            //Reply "9996" means the pin number is not valid for analog input read
+    return(ERROR_INVALID_ANALOGIN_PIN);
 }
 
 int digclass::PWM(int pin, int level)
 {
   // Convert data from 0-100% to 0-255
   level /= 100;
+  level *= 255;
 
   if(level > 255)
     level = 255;
   else if(level < 0)
     level = 0;
 
-  if(pin == (3 || 5 || 6 || 9))
+  if(pin == (pwm_3 || pwm_5 || pwm_6 || pwm_9))
   {
     analogWrite(pin, level);
     return(level);
   }
   else
-    return(9993);                                            //Reply "9993" means the pin number is not valid for analog output write (PWM)
+    return(ERROR_INVALID_PWM_PIN);
 }
 
 int digclass::FREQ(int pin)
@@ -73,7 +74,7 @@ int digclass::FREQ(int pin)
   int frequency;                                             //Storing frequency (float???)
   int TotalTime;                                             //Storing total cycle time (float???)
 
-  if((3 <= pin <= 9) || (13 <= pin <= 19))                   //Discard SPI pins (2(Unknown), 10(CS), 11(MOSI), 12(MISO), 13(SCK)) - Also discard pins that are analog exclusive (20(A6), 21(A7))
+  if((dig_lo_min <= pin <= dig_lo_max) || (dig_hi_min <= pin <= dig_hi_max))
   {
     pinMode(pin,INPUT);
     Htime = pulseIn(pin,HIGH);                               //Read high time in microseconds (timeout default = 1s)
@@ -88,17 +89,14 @@ int digclass::FREQ(int pin)
     }
     else
       return(0);                                             //Reply "0" means the input frequency is very low or none
-    
-
-    
   }
   else
-    return(9997);                                            //Reply "9997" means the pin number is not valid for digital read/write
+    return(ERROR_INVALID_DIGITAL_PIN);
 }
 
 int digclass::TONE(int pin, int level, int duration, String startstop)
 {
-  if((3 <= pin <= 9) || (13 <= pin <= 19))                   //Discard SPI pins (2(Unknown), 10(CS), 11(MOSI), 12(MISO), 13(SCK)) - Also discard pins that are analog exclusive (20(A6), 21(A7))
+  if((dig_lo_min <= pin <= dig_lo_max) || (dig_hi_min <= pin <= dig_hi_max))
   {
     if(startstop == "start")
     {
@@ -118,7 +116,7 @@ int digclass::TONE(int pin, int level, int duration, String startstop)
     }
   }
   else
-    return(9997);                                            //Reply "9997" means the pin number is not valid for digital read/write
+    return(ERROR_INVALID_DIGITAL_PIN);
 }
 
 digclass digital = digclass();

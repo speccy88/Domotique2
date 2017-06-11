@@ -17,6 +17,8 @@
 #include "Arduino.h"
 #include "pressure.h"
 
+#include "error_codes.h"                                                               // Includes error codes and pins definitions (min/max pin numbers)
+
 #include <Wire.h>
 #include <SPI.h>
 #include <Adafruit_Sensor.h>
@@ -44,7 +46,7 @@ int presclass::PRES(int pin)
   if (!bmp.begin())  
   {
     Serial.println("Could not find a valid BMP280 sensor, check wiring!");
-    return(9992); //Invalid sensor or not found
+    return(ERROR_SENSOR_READ); //Invalid sensor or not found
   }
 
   pres = bmp.readPressure();
@@ -52,7 +54,7 @@ int presclass::PRES(int pin)
   if(isnan(pres))
   {
     Serial.println("ERROR : Read failed");
-    return(9995); // Reading error
+    return(ERROR_SENSOR_READ); // Reading error
   }  
 
   Serial.print(F("Pressure: "));

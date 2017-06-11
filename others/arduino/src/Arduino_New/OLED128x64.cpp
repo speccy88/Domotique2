@@ -4,6 +4,8 @@
 #include "Arduino.h"
 #include "OLED128x64.h"
 
+#include "error_codes.h"                                                               // Includes error codes and pins definitions (min/max pin numbers)
+
 #include <Wire.h>
 #include "SSD1306Ascii.h"
 #include "SSD1306AsciiWire.h"

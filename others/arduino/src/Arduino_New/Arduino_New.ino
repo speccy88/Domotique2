@@ -3,7 +3,10 @@
 #include <IPAddress.h>                                                                 // IPAddress controller library
 #include <avr/wdt.h>                                                                   // Watchdog controller library
 
-#include "ip_address.h" // modify the file ip_address_template.h for your own setup
+// Modify the file ip_address_template.h for your own setup and rename to ip_address.h
+// This ensures you personnal data such as IP addresses doesn't get on github to become public
+#include "ip_address.h"
+
 #include "digital.h"
 #include "temp.h"
 #include "pressure.h"
@@ -12,26 +15,16 @@
 #include "OLED128x64.h"
 
 #define BUFLEN 32                                                                      // Define length of the reply string
+#define ETHERBUFLEN 100                                                                // tcp/ip send and receive buffer
 
-#define DEBUG
+#define DEBUG                                                                          // Comment this line to remove all serial data to free up some memory
 
-
+#include "error_codes.h"                                                               // Includes error codes and pins definitions (min/max pin numbers)
 
 static int Ether_cspin = 10;                                                           // Chip select pin numper for ethernet shield
 static int ListenPort = 5000;                                                          // Static port to listen
 
-
-
-#ifdef board_OK
-#else
-  #error("Invalid board selection, please adjust defines in IP selector section above");
-#endif
-
-static byte gwip[] = { 192,168,0,2 };                                                  // Static Gateway IP Address
-static byte subnet[] = { 255,255,255,0 };                                              // Static Subnet Mask
-
-byte Ethernet::buffer[100];                                                            // tcp/ip send and receive buffer
-//byte Ethernet::buffer[500];                                                            // tcp/ip send and receive buffer
+byte Ethernet::buffer[ETHERBUFLEN];                                                    // tcp/ip send and receive buffer
 
 int level = 0;
 int pin = 0;
@@ -152,7 +145,7 @@ void callSubfunction()
   #else
     else if(command == "write" || command == "read")
     {
-      reply[0] = 9998;                                                                               //Reply "9998" means the command is not activated (defined in current device)
+      reply[0] = ERROR_COMMAND_NOT_ACTIVATED;
       sprintf(str, "%d", reply[0]);
     }
   #endif
@@ -179,7 +172,7 @@ void callSubfunction()
   #else
     else if(command == "analog")
     {
-      reply[0] = 9998;                                                                               //Reply "9998" means the command is not activated (defined in current device)
+      reply[0] = ERROR_COMMAND_NOT_ACTIVATED;
       sprintf(str, "%d", reply[0]);
     }
   #endif
@@ -199,7 +192,7 @@ void callSubfunction()
   #else
     else if(command == "pwm")
     {
-      reply[0] = 9998;                                                                             //Reply "9998" means the command is not activated (defined in current device)
+      reply[0] = ERROR_COMMAND_NOT_ACTIVATED;
       sprintf(str, "%d", reply[0]);
     }
   #endif
@@ -219,7 +212,7 @@ void callSubfunction()
   #else
     else if(command == "freq")
     {
-      reply[0] = 9998;                                                                             //Reply "9998" means the command is not activated (defined in current device)
+      reply[0] = ERROR_COMMAND_NOT_ACTIVATED;
       sprintf(str, "%d", reply[0]);
     }
   #endif
@@ -238,7 +231,7 @@ void callSubfunction()
   #else
     else if(command == "tone")
     {
-      reply[0] = 9998;                                                                             //Reply "9998" means the command is not activated (defined in current device)
+      reply[0] = ERROR_COMMAND_NOT_ACTIVATED;
       sprintf(str, "%d", reply[0]);
     }
   #endif
@@ -264,7 +257,7 @@ void callSubfunction()
   #else
     else if(command == "tone")
     {
-      reply[0] = 9998;                                                                             //Reply "9998" means the command is not activated (defined in current device)
+      reply[0] = ERROR_COMMAND_NOT_ACTIVATED;
       sprintf(str, "%d", reply[0]);
     }
   #endif
@@ -284,7 +277,7 @@ void callSubfunction()
   #else
     else if(command == "temp")
     {
-      reply[0] = 9998;                                                                             //Reply "9998" means the command is not activated (defined in current device)
+      reply[0] = ERROR_COMMAND_NOT_ACTIVATED;
       sprintf(str, "%d", reply[0]);
     }
   #endif
@@ -303,7 +296,7 @@ void callSubfunction()
   #else
     else if(command == "pres")
     {
-      reply[0] = 9998;                                                                             //Reply "9998" means the command is not activated (defined in current device)
+      reply[0] = ERROR_COMMAND_NOT_ACTIVATED;
       sprintf(str, "%d", reply[0]);
     }
   #endif
@@ -319,7 +312,7 @@ void callSubfunction()
   #else
     else if(command == "stgc")
     {
-      reply[0] = 9998;                                                                             //Reply "9998" means the command is not activated (defined in current device)
+      reply[0] = ERROR_COMMAND_NOT_ACTIVATED;
       sprintf(str, "%d", reply[0]);
     }
   #endif
@@ -335,14 +328,14 @@ void callSubfunction()
   #else
     else if(command == "oled")
     {
-      reply[0] = 9998;                                                                             //Reply "9998" means the command is not activated (defined in current device)
+      reply[0] = ERROR_COMMAND_NOT_ACTIVATED;
       sprintf(str, "%d", reply[0]);
     }
   #endif
   
   else
   {
-    reply[0] = 9999;                                                                               //Reply "9999" means the command is not valid
+    reply[0] = ERROR_UNDEFINED_COMMAND;
     sprintf(str, "%d", reply[0]);
   }  
 }
