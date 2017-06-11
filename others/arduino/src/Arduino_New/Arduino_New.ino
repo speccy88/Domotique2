@@ -3,6 +3,7 @@
 #include <IPAddress.h>                                                                 // IPAddress controller library
 #include <avr/wdt.h>                                                                   // Watchdog controller library
 
+#include "ip_address.h" // modify the file ip_address_template.h for your own setup
 #include "digital.h"
 #include "temp.h"
 #include "pressure.h"
@@ -14,55 +15,12 @@
 
 #define DEBUG
 
-//Select ONLY one controller and comment the others
-//#define House
-#define Garage
-//#define Pool
+
 
 static int Ether_cspin = 10;                                                           // Chip select pin numper for ethernet shield
 static int ListenPort = 5000;                                                          // Static port to listen
 
-//Set IP address and MAC according to selected defined controller
-#ifdef House
-  #define board_OK
-  static byte myip[] = { 192,168,0,6 };                                                // Static IP Address
-  static byte mymac[] = { 0xFF,0xFF,0xFF,0xFF,0xFF,0x01 };                             // Static MAC Address - MUST NOT have 2 identical MAC address on same network
-  #define enable_digital
-  //#define enable_analogin
-  //#define enable_analogout
-  //#define enable_frequency
-  //#define enable_tone
-  //#define enable_temp
-  //#define enable_baro
-  //#define enable_expander
-  //#define enable_stgc
-  #define enable_oled
-#endif
-#ifdef Garage
-  #define board_OK
-  static byte myip[] = { 192,168,0,7 };                                                // Static IP Address
-  static byte mymac[] = { 0xFF,0xFF,0xFF,0xFF,0xFF,0x02 };                             // Static MAC Address - MUST NOT have 2 identical MAC address on same network
-  #define enable_digital
-  //#define enable_analogin
-  //#define enable_analogout
-  //#define enable_frequency
-  #define enable_tone
-  //#define enable_temp
-  //#define enable_baro
-  //#define enable_expander
-  //#define enable_stgc
-  #define enable_oled
-#endif
-#ifdef Pool
-  #define board_OK
-  static byte myip[] = { 192,168,0,8 };                                                // Static IP Address
-  static byte mymac[] = { 0xFF,0xFF,0xFF,0xFF,0xFF,0x03 };                             // Static MAC Address - MUST NOT have 2 identical MAC address on same network
-  //#define enable_digital
-  //#define enable_temp
-  //#define enable_baro
-  //#define enable_expander
-  //#define enable_STGC
-#endif
+
 
 #ifdef board_OK
 #else

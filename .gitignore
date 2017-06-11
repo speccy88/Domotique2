@@ -1,3 +1,6 @@
+# each user have their own IP addresses for their domotic setup
+ip_address.h
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
