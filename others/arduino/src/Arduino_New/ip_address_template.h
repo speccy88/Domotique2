@@ -13,4 +13,5 @@ static byte mymac[] = { 0xFF,0xFF,0xFF,0xFF,0xFF,0x01 };                        
 #define enable_baro         //18% memory use
 #define enable_expander     //3% memory use
 #define enable_stgc         //2% memory use
-#define enable_oled         //4% memory use
+#define enable_oledascii    //4% memory use
+#define enable_oledfull     //34% memory use

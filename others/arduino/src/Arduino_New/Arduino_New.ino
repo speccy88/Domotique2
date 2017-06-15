@@ -12,7 +12,7 @@
 #include "pressure.h"
 #include "expander.h"
 #include "stgc.h"
-#include "OLED128x64.h"
+#include "OLED.h"
 
 #define BUFLEN 32                                                                      // Define length of the reply string
 #define ETHERBUFLEN 100                                                                // tcp/ip send and receive buffer
@@ -69,7 +69,7 @@ void udpReceive(uint16_t dest_port, uint8_t src_ip[IP_LEN], uint16_t src_port, c
 void parseData(String stringdata)
 {  
   // Blank all string tables
-  for(int i=0; i<=7; i++)
+  for(int i=0; i<10; i++)
   {
     delimiters[i] = 0;
     commands[i] = "";
@@ -77,7 +77,7 @@ void parseData(String stringdata)
 
   // Find all delimiters positions in received string
   delimiter_qty = 0;
-  for(int i=0; i<=7; i++)
+  for(int i=0; i<10; i++)
   {
     if(i==0)
       delimiters[i] = stringdata.indexOf(':');
@@ -317,16 +317,18 @@ void callSubfunction()
     }
   #endif
 
-  // OLED DISPLAY
+  // OLED DISPLAY WITH ASCII ONLY LIBRARIES
+  // This function is predefined to 2, 5 or 8 lines:
   #ifdef enable_oled
-    // OLED DISPLAY USING SSD1309 128x64 (maybe 32 later)
+    // OLED DISPLAY USING SSD1306 128x64 (maybe 32 later)
     else if(command == "oled")
     {
-      reply[0] = OLED.SEND64(commands[1], commands[2], commands[3], commands[4], commands[5]);
+      level = commands[1].toInt();
+      reply[0] = OLED.SEND(level, commands[2], commands[3], commands[4], commands[5], commands[6], commands[7], commands[8], commands[9]);
       sprintf(str, "%d", reply[0]);
     }
   #else
-    else if(command == "oled")
+    else if((command == "oled"))
     {
       reply[0] = ERROR_COMMAND_NOT_ACTIVATED;
       sprintf(str, "%d", reply[0]);
