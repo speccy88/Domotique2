@@ -4,8 +4,12 @@
   class tempclass
   {
     public:
-      tempclass();
-      int TEMPERATURE(int pin, String units, int request);
+      tempclass(char **commands_ptr);
+      int TEMPERATURE(int pin, char units, int request);
+      void process(char* return_str);
+    private:
+      char **commands;
+      char *result;
   };
   
   extern tempclass temp;

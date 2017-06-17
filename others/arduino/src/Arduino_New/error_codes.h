@@ -5,8 +5,8 @@
 #define ERROR_INVALID_ANALOGIN_PIN 9996                                                //Reply "9996" means the pin number is not valid for analog input read
 #define ERROR_INVALID_PWM_PIN 9995                                                     //Reply "9993" means the pin number is not valid for analog output write (PWM)
 #define ERROR_SENSOR_READ 9994                                                         //Reply "9995" means the sensor returned a reading error
-#define ERROR_UNDEFINED_COMMAND 9993                                                   //Reply "9994" means the sensor reading units are invalid
-#define ERROR_SENSOR_READ 9992                                                         //Reply "9992" means the sensor is invalid or not found
+//#define ERROR_UNDEFINED_COMMAND 9993                                                   //Reply "9994" means the sensor reading units are invalid
+//#define ERROR_SENSOR_READ 9992                                                         //Reply "9992" means the sensor is invalid or not found
 #define ERROR_SENSOR_REQUEST_FAIL 9991                                                 //Reply "9991" mesan the sensor function received an invalid request
 
 // Define pins that are available for operations

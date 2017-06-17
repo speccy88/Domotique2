@@ -6,23 +6,45 @@
 #include "DHT.h"
 #define DHTTYPE DHT22                                                                  // DHT 22  (AM2302), AM2321
 
-tempclass::tempclass(){}
-
-int tempclass::TEMPERATURE(int pin, String units, int request)
+tempclass::tempclass(char **commands_ptr)
 {
+  commands = commands_ptr;
+}
+
+void tempclass::process(char* return_str)
+{
+  Serial.println("PROCESS CLASS");
+  Serial.println(commands[0]);
+  Serial.println(commands[1]);
+  Serial.println(commands[2]);
+  Serial.println(commands[3]);
+  Serial.println(atoi(commands[1]));
+  int pin = atoi(commands[1]);
+  char units = commands[2];
+  TEMPERATURE(pin, units, 1);
+  
+  //sprintf(return_str, "%d,%d,%d", reply[0], reply[1], reply[2]);
+}
+
+
+int tempclass::TEMPERATURE(int pin, char units, int request)
+{
+  Serial.println("INSIDE TEMP");
+  Serial.println(pin);
   DHT dht(pin, DHTTYPE);
   dht.begin();
 
   float temp = 0;
+
   
-  if(units == "C")
+  if(strcmp (units,"C") == 0)
     temp = dht.readTemperature(false);
-  else if(units == "F")
+  else if(strcmp (units,"F") == 0)
     temp = dht.readTemperature(true);
-  else if(units == "K")
-    temp = dht.readTemperature(false) + 273.15;
   else
     return(ERROR_UNDEFINED_COMMAND); // Invalid units
+
+  Serial.println(temp);
 
   float hum = dht.readHumidity();
   float hi = dht.computeHeatIndex(temp, hum);
@@ -31,6 +53,8 @@ int tempclass::TEMPERATURE(int pin, String units, int request)
     return(ERROR_SENSOR_READ); // Reading error
   else
   {
+    Serial.println("INSIDE CASE");
+    Serial.println(request);
     switch(request)
     {
       case 1: // Temperature
@@ -69,5 +93,5 @@ int tempclass::TEMPERATURE(int pin, String units, int request)
   }
 }
 
-tempclass temp = tempclass();
+
 
