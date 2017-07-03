@@ -11,6 +11,8 @@ class Device:
         self.device = device
         self.name = device["_id"]
         self.enabled = device["enabled"]
+        if "value" in device:
+            self.value = device["value"]
         self.initAstral()
         self.updateStartStopTime()
     
