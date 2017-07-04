@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Configuration</title>
+<script>
+
+function f1() {
+    console.log("f1")
+    var input1 = document.getElementById("input1");
+    var p1 = document.getElementById("p1");
+    address = input1.value;
+    var options = { address: address};
+    document.location = 'pebblejs://close#' + encodeURIComponent(JSON.stringify(options));
+
+}
+
+function getQueryVariable(variable) {
+    var query = window.location.search.substring(1);
+    var vars = query.split('&');
+    for (var i = 0; i < vars.length; i++) {
+        var pair = vars[i].split('=');
+        if (decodeURIComponent(pair[0]) == variable) {
+            return decodeURIComponent(pair[1]);
+        }
+    }
+    console.log('Query variable %s not found', variable);
+}
+    
+function f2() {
+    console.log("f2")
+    var p1 = document.getElementById("p1");
+    p1.innerHTML = getQueryVariable('address');
+}
+
+    
+    
+window.addEventListener("DOMContentLoaded", f2, false);
+
+</script>
+</head>
+<body>
+
+<h1>Pebble domotics config</h1>
+<p>Enter your domotics service IP address and port (e.g. "192.168.0.190:8000")</p>
+<input type="text" id="input1">
+<button type="button" onclick="f1()">Set</button>
+<p>Actual Value:</p>
+<p id="p1"></p>
+</body>
+</html>
