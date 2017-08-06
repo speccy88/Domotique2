@@ -3,8 +3,7 @@ from modules.arduino import Arduino
 def deviceFactory(devices_description):
     input_devices = []
     output_devices = []
-    analog_devices = []
-    dht22_devices = []
+
     for desc in devices_description:
         if "device_type" in desc:
             ### Arduino device type

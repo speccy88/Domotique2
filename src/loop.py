@@ -1,9 +1,14 @@
 from datetime import datetime, timedelta
 from modules.deviceFactory import deviceFactory
+from astral import Astral, Location
+from datetime import datetime, timedelta
 import tornado.ioloop
 
 DELIMITER = ":"
 D = DELIMITER
+
+def stringToTime(text):
+    return datetime.strptime(text, '%H:%M').time()
 
 def init_device_loop(context):
     db = context["db"]
@@ -16,6 +21,22 @@ def init_device_loop(context):
     pc = tornado.ioloop.PeriodicCallback(lambda: device_loop(devices), 1000)
     pc.start()
     context["pc"] = pc
+
+def initAstral(self):
+    a = Astral()
+    a.solar_depression = 'civil'
+    l = Location()
+    l.name = 'Dolbeau-Mistassini'
+    l.region = 'Canada'
+    l.latitude = 48.9016
+    l.longitude = -72.2156
+    l.timezone = 'America/Montreal'
+    l.elevation = 139
+    self.location = l
+
+def updateSun(self):
+    self.sun_date = datetime.now().date()
+    self.sun = self.location.sun(date=self.sun_date, local=True)
     
 def device_loop(devices):
     input_devices, output_devices = devices
