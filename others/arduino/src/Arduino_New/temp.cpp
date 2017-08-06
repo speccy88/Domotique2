@@ -6,7 +6,9 @@
 #include "DHT.h"
 #define DHTTYPE DHT22                                                                  // DHT 22  (AM2302), AM2321
 
-tempclass::tempclass(char **commands_ptr)
+tempclass* temp;
+
+tempclass::tempclass(char (*commands_ptr)[COMMAND_LENGTH])
 {
   commands = commands_ptr;
 }
@@ -14,15 +16,11 @@ tempclass::tempclass(char **commands_ptr)
 void tempclass::process(char* return_str)
 {
   Serial.println("PROCESS CLASS");
-  Serial.println(commands[0]);
-  Serial.println(commands[1]);
-  Serial.println(commands[2]);
-  Serial.println(commands[3]);
-  Serial.println(atoi(commands[1]));
   int pin = atoi(commands[1]);
-  char units = commands[2];
-  TEMPERATURE(pin, units, 1);
+  char units = (char)*commands[2];
   
+
+  sprintf(return_str, "%d", TEMPERATURE(pin, units, 1));
   //sprintf(return_str, "%d,%d,%d", reply[0], reply[1], reply[2]);
 }
 
@@ -31,15 +29,16 @@ int tempclass::TEMPERATURE(int pin, char units, int request)
 {
   Serial.println("INSIDE TEMP");
   Serial.println(pin);
+  Serial.println(units);
   DHT dht(pin, DHTTYPE);
   dht.begin();
 
   float temp = 0;
 
   
-  if(strcmp (units,"C") == 0)
+  if(units == 'C')
     temp = dht.readTemperature(false);
-  else if(strcmp (units,"F") == 0)
+  else if(units == 'F')
     temp = dht.readTemperature(true);
   else
     return(ERROR_UNDEFINED_COMMAND); // Invalid units
