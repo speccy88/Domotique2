@@ -19,9 +19,13 @@ def init_device_loop(context):
     
 def device_loop(devices):
     input_devices, output_devices = devices
-
-    ### Need to implement loop to read input devices
-
+    sensors_data = {}
+    
+    for device in input_devices:
+        sensors_data[device.name] = device.value
+    
+    print(sensors_data)
+    
     for device in output_devices:
         device_output = 0
         if device.enabled:

@@ -10,8 +10,9 @@ class Device:
     def __init__(self, device):
         self.device = device
         self.name = device["_id"]
-        self.enabled = device["device_enabled"]
-        self.time_enabled = device["time_enabled"]
+        self.enabled = device["enabled"]
+        if "value" in device:
+            self.value = device["value"]
         self.initAstral()
         self.updateStartStopTime()
     
