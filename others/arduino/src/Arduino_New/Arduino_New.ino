@@ -16,39 +16,26 @@
 #include "stgc.h"
 #include "OLED.h"
 
-#define BUFLEN 32                                                                      // Define length of the reply string
-#define ETHERBUFLEN 100                                                                // tcp/ip send and receive buffer
+#define UDP_REPLY_BUFLEN 32                    // Define length of the reply string
+#define UDP_RECV_BUFLEN  100                   // tcp/ip send and receive buffer
 
-#define DEBUG                                                                          // Comment this line to remove all serial data to free up some memory
+//#define DEBUG                                  // Comment this line to remove all serial data to free up some memory
 
-#include "error_codes.h"                                                               // Includes error codes and pins definitions (min/max pin numbers)
+#include "error_codes.h"                       // Includes error codes and pins definitions (min/max pin numbers)
 
-#define NUMBER_OF_COMMANDS 10
-#define COMMAND_LENGTH 16
+static int Ether_cspin = 10;                   // Chip select pin numper for ethernet shield
+static int ListenPort = 5000;                  // Static port to listen
 
-char **commands;
-
-static int Ether_cspin = 10;                                                           // Chip select pin numper for ethernet shield
-static int ListenPort = 5000;                                                          // Static port to listen
-
-byte Ethernet::buffer[ETHERBUFLEN];                                                    // tcp/ip send and receive buffer
-
-int level = 0;
-int pin = 0;
-
-char replyUDP[BUFLEN];
-int SourcePort;                                                                        // Source port message came from in order to reply
-
-char str[BUFLEN];
-
-//skills
-tempclass temp = tempclass(commands);
+byte Ethernet::buffer[UDP_RECV_BUFLEN];
+char UDP_Reply_Buffer[UDP_REPLY_BUFLEN];
+int SourcePort;
 
 
 //callback that prints received packets to the serial port
 void udpReceive(uint16_t dest_port, uint8_t src_ip[IP_LEN], uint16_t src_port, const char *data, uint16_t len)
 {
   IPAddress src(src_ip[0],src_ip[1],src_ip[2],src_ip[3]);
+  char (*commands)[COMMAND_LENGTH];
 
   SourcePort = src_port;
 
@@ -63,63 +50,60 @@ void udpReceive(uint16_t dest_port, uint8_t src_ip[IP_LEN], uint16_t src_port, c
     Serial.println("");
     Serial.print("Payload: ");
     Serial.println(data);
+    Serial.println("<- DATA RECEIVED");
   #endif
 
-  Serial.println("DATA RECEIVED");
+  
   commands = parseData(data);
-  Serial.println("DATA PARSED");
-  Serial.println(commands[0]);
-
-  Serial.println(strcmp (commands[0],"temp") == 0);
+  Serial.println("<- DATA PARSED");
   
-  callSubfunction();
   
+  callSubfunction(commands);
   UDPreply();
   
 }
 
 
 
-void callSubfunction()
+void callSubfunction(char (*commands)[COMMAND_LENGTH])
 {
-  String command = commands[0];
-  command.toLowerCase();
+  
+  char* command = commands[0];
   int reply[8];
-  int level = 0;
-  int pin = 0;
   // FIRST COMPARISON ALWAYS FALSE
   // THIS WILL ALLOW TO DISABLE SOME SUBROUTINES
-  if(1 == 0)
-    pin = atoi(commands[1]);
-  else if(strcmp(commands[0],"temp") == 0)
+  if(false)
+    delayMicroseconds(0);
+  else if(strcmp(command,"temp") == 0)
   {
     Serial.println("BEFORE TEMP");
-    Serial.println(str);
-    temp.process(str);
+    //Serial.println(str);
+    temp = new tempclass(commands);    //pass commands buffer to temp class
+    temp->process(UDP_Reply_Buffer);   //process the commands and put results in reply buffer
   }
   else
   {
     Serial.println("FAIL TO FIND FUNCTION");
     reply[0] = ERROR_UNDEFINED_COMMAND;
-    sprintf(str, "%d", reply[0]);
+    //sprintf(str, "%d", reply[0]);
   }  
 }
 
 void UDPreply()
 {
-  strcpy(replyUDP, str);
+  //strcpy(UDP_Reply_Buffer, str);
 
   #ifdef DEBUG
     Serial.print("Reply: ");
-    Serial.println(replyUDP);
+    Serial.println(UDP_Reply_Buffer);
     Serial.print("Reply Length: ");
-    Serial.println(strlen(replyUDP));
+    Serial.println(strlen(UDP_Reply_Buffer));
     Serial.println("Watchdog Reset...");
     Serial.println("Command Completed...");
     Serial.println("-----------------------------------------------------");
   #endif
 
-  ether.makeUdpReply(replyUDP, strlen(replyUDP), SourcePort);
+  ether.makeUdpReply(UDP_Reply_Buffer, strlen(UDP_Reply_Buffer), SourcePort);
   wdt_reset();
 }
 
@@ -127,6 +111,8 @@ void setup()
 {
   wdt_disable();
   //wdt_enable(WDTO_8S);
+
+  
   
   Serial.begin(9600);
   Serial.println("[START]");
@@ -142,4 +128,5 @@ void setup()
 void loop()
 {
   ether.packetLoop(ether.packetReceive());
+  
 }
