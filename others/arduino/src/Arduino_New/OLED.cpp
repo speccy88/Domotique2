@@ -6,80 +6,78 @@
 
 #include "error_codes.h"                                                               // Includes error codes and pins definitions (min/max pin numbers)
 
-#define enable_oled_large   //16% memory use
+#include <SSD1306_text.h>
 
 #include <Wire.h>
-#include "SSD1306Ascii.h"
-#include "SSD1306AsciiWire.h"
 
 // 0X3C+SA0 - 0x3C or 0x3D
 #define I2C_ADDRESS 0x3C
 
-SSD1306AsciiWire oled;
+#define OLED_RESET 22     // Reset pin or 22 for no reset pin
+SSD1306_text display(OLED_RESET);
 
 oledclass::oledclass(){}
 
-int oledclass::SEND(int NbrLines, String Line1, String Line2, String Line3, String Line4, String Line5, String Line6, String Line7, String Line8)
+int oledclass::SEND(int NbrLines, char Line1, char Line2, char Line3, char Line4, char Line5, char Line6, char Line7, char Line8)
 {
-  Wire.begin();         
-  oled.begin(&Adafruit128x64, I2C_ADDRESS);
-  oled.set400kHz();  
-
-  if(NbrLines == 0)
-  {
-    oled.setContrast(Line1.toInt());
-    return(1);
-  }
+  display.init(I2C_ADDRESS);
 
   if(NbrLines == 8)
   {
-    oled.setContrast(Line8.toInt());
-    oled.setFont(Adafruit5x7);  
-    oled.set1X();
-    oled.clear();  
-    oled.println(Line1);
-    oled.println(Line2);
-    oled.println(Line3);
-    oled.println(Line4);
-    oled.println(Line5);
-    oled.println(Line6);
-    oled.println(Line7);
-    oled.println(Line8);
+    display.clear();
+    
+    display.setTextSize(1, 1);
+    display.setCursor(0, 0); //(y, x)
+    display.write(Line1);
+    display.setCursor(0, 1); //(y, x)
+    display.write(Line2);
+    display.setCursor(0, 2); //(y, x)
+    display.write(Line3);
+    display.setCursor(0, 3); //(y, x)
+    display.write(Line4);
+    display.setCursor(0, 4); //(y, x)
+    display.write(Line5);
+    display.setCursor(0, 5); //(y, x)
+    display.write(Line6);
+    display.setCursor(0, 6); //(y, x)
+    display.write(Line7);
+    display.setCursor(0, 7); //(y, x)
+    display.write(Line8);
     return(1);
   }
-
-  if(NbrLines == 5)
+  else if(NbrLines == 5)
   {
-    oled.setFont(Adafruit5x7);  
-    oled.set1X();
-    oled.clear();  
-    oled.println(Line1);
-    oled.set2X();
-    oled.println(Line2);
-    oled.println(Line3);
-    oled.println(Line4);
-    oled.set1X();
-    oled.println(Line5);
+    display.clear(); 
+    
+    display.setTextSize(1, 1);
+    display.setCursor(0, 0); //(y, x)
+    display.write(Line1);
+    display.setTextSize(2, 1);
+    display.setCursor(0, 2); //(y, x)
+    display.write(Line2);
+    display.setCursor(0, 4); //(y, x)
+    display.write(Line3);
+    display.setCursor(0, 6); //(y, x)
+    display.write(Line4);
+    display.setTextSize(1, 1);
+    display.setCursor(0, 7); //(y, x)
+    display.write(Line5);
     return(1);
   }
-
-  #ifdef enable_oled_large
-    if(NbrLines == 2)
-    {
-      oled.setFont(Adafruit5x7); 
-      oled.clear();
-      oled.set1X();
-      oled.println(Line1);
-      oled.setFont(CalLite24);    
-      oled.set2X();
-      oled.println(Line2);
-      return(1);
-    }
-  #else
-    if((NbrLines == 2))
-      return(ERROR_COMMAND_NOT_ACTIVATED);
-  #endif
-  
+  else if(NbrLines == 2)
+  {
+    display.clear();
+    
+    display.setTextSize(1, 1);
+    display.setCursor(0, 0); //(y, x)
+    display.write(Line1);
+    display.setCursor(0, 3); //(y, x)
+    display.setTextSize(4, 1);
+    display.write(Line2);
+    return(1);
+  }
+  else
+    return(ERROR_COMMAND_NOT_ACTIVATED);
 }
 
 oledclass OLED = oledclass();

@@ -45,7 +45,10 @@ int presclass::PRES(int pin)
 
   if (!bmp.begin())  
   {
-    Serial.println("Could not find a valid BMP280 sensor, check wiring!");
+    #ifdef DEBUG
+      Serial.println("Could not find a valid BMP280 sensor, check wiring!");
+    #endif
+  
     return(ERROR_SENSOR_READ); //Invalid sensor or not found
   }
 
@@ -53,14 +56,19 @@ int presclass::PRES(int pin)
 
   if(isnan(pres))
   {
-    Serial.println("ERROR : Read failed");
+    #ifdef DEBUG
+      Serial.println("ERROR : Read failed");
+    #endif
+    
     return(ERROR_SENSOR_READ); // Reading error
   }  
 
-  Serial.print(F("Pressure: "));
-  Serial.print(pres);
-  Serial.println(" Pa");
-
+  #ifdef DEBUG
+     Serial.print(F("Pressure: "));
+    Serial.print(pres);
+    Serial.println(" Pa");
+  #endif
+ 
   return(pres/100); // Pressure is read in Pa, turns it into kPa * 10 to read one decimal
 }
 

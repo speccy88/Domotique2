@@ -4,17 +4,11 @@
 #include <avr/wdt.h>                                                                   // Watchdog controller library
 #include "parse.h"
 
-
 // Modify the file ip_address_template.h for your own setup and rename to ip_address.h
 // This ensures you personnal data such as IP addresses doesn't get on github to become public
 #include "ip_address.h"
 
 #include "digital.h"
-#include "temp.h"
-#include "pressure.h"
-#include "expander.h"
-#include "stgc.h"
-#include "OLED.h"
 
 #define UDP_REPLY_BUFLEN 32                    // Define length of the reply string
 #define UDP_RECV_BUFLEN  100                   // tcp/ip send and receive buffer
@@ -29,7 +23,6 @@ static int ListenPort = 5000;                  // Static port to listen
 byte Ethernet::buffer[UDP_RECV_BUFLEN];
 char UDP_Reply_Buffer[UDP_REPLY_BUFLEN];
 int SourcePort;
-
 
 //callback that prints received packets to the serial port
 void udpReceive(uint16_t dest_port, uint8_t src_ip[IP_LEN], uint16_t src_port, const char *data, uint16_t len)
@@ -52,73 +45,22 @@ void udpReceive(uint16_t dest_port, uint8_t src_ip[IP_LEN], uint16_t src_port, c
     Serial.println(data);
     Serial.println("<- DATA RECEIVED");
   #endif
-
   
   commands = parseData(data);
-  Serial.println("<- DATA PARSED");
-  
+  #ifdef DEBUG
+    Serial.println("<- DATA PARSED");
+  #endif
   
   callSubfunction(commands);
   UDPreply();
-  
 }
-
-
 
 void callSubfunction(char (*commands)[COMMAND_LENGTH])
 {
-  
   char* command = commands[0];
-  int reply[8];
-
-  int pin;
-  int level;
-  // FIRST COMPARISON ALWAYS FALSE
-  // THIS WILL ALLOW TO DISABLE SOME SUBROUTINES
-  if(false)
-    delayMicroseconds(0);
-  #ifdef enable_temp
-  else if(strcmp(command,"temp") == 0)
-  {
-    Serial.println("BEFORE TEMP");
-    //Serial.println(str);
-    temp = new tempclass(commands);    //pass commands buffer to temp class
-    temp->process(UDP_Reply_Buffer);   //process the commands and put results in reply buffer
-  }
-  #endif
-  // DIGITAL INPUTS AND OUTPUTS
-  #ifdef enable_digital
-    // WRITE DIGITAL OUTPUT PIN
-    else if(strcmp(command,"write") == 0)
-    {
-      pin = atoi(commands[1]);
-      level = atoi(commands[2]);
-
-      pinMode(pin, OUTPUT);
-      digitalWrite(pin, level);
-
-      strcpy (UDP_Reply_Buffer,"OK");
-    }
-    // READING DIGITAL INPUT PIN
-    else if(strcmp(command,"read") == 0)
-    {
-      pin = atoi(commands[1]);
-      pinMode(pin, INPUT_PULLUP);
-      level = digitalRead(pin);
-
-      char read_buf[2];
-      read_buf[0] = level+48;
-      read_buf[1] = 0;
-
-      strcpy (UDP_Reply_Buffer,read_buf);
-    }
-  #endif
-  else
-  {
-    Serial.println("FAIL TO FIND FUNCTION");
-    reply[0] = ERROR_UNDEFINED_COMMAND;
-    //sprintf(str, "%d", reply[0]);
-  }  
+  
+  digital = new digclass(commands);    //pass commands buffer to temp class
+  digital->process(UDP_Reply_Buffer);  //process the commands and put results in reply buffer
 }
 
 void UDPreply()
@@ -145,10 +87,11 @@ void setup()
   //wdt_enable(WDTO_8S);
 
   
+  #ifdef DEBUG
+    Serial.begin(9600);
+    Serial.println("[START]");
+  #endif
   
-  Serial.begin(9600);
-  Serial.println("[START]");
-
   ether.begin(sizeof Ethernet::buffer, mymac, Ether_cspin);
   ether.staticSetup(myip, gwip, subnet);
 
@@ -160,5 +103,4 @@ void setup()
 void loop()
 {
   ether.packetLoop(ether.packetReceive());
-  
 }

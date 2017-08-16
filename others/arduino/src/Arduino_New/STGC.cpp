@@ -49,7 +49,9 @@ int stgcclass::READ(int one, int two, int three, int four, int five)
       index |= (1 << i);
 
   // displays orientation using table lookup
-  Serial.println(table[index]);
+  #ifdef DEBUG
+    Serial.println(table[index]);
+  #endif
   
   return(table[index]);
 }

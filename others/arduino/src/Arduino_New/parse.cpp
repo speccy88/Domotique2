@@ -4,6 +4,8 @@
 #include "string.h"
 #include <Arduino.h>
 
+#include "error_codes.h"
+
 char commands[NUMBER_OF_COMMANDS][COMMAND_LENGTH];
 
 char (*parseData(const char* stringData))[COMMAND_LENGTH]
@@ -57,16 +59,12 @@ char (*parseData(const char* stringData))[COMMAND_LENGTH]
       commands[i][len] = 0;
     }
 
-  //#ifdef DEBUG
+  #ifdef DEBUG
     Serial.print("Command #");
     Serial.print(i+1);
     Serial.print(": ");
     Serial.println(commands[i]);
-  //#endif    
-    
-
-    
+  #endif    
   }
-
   return commands;
 }
