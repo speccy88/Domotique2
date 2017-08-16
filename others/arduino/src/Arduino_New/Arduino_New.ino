@@ -70,10 +70,14 @@ void callSubfunction(char (*commands)[COMMAND_LENGTH])
   
   char* command = commands[0];
   int reply[8];
+
+  int pin;
+  int level;
   // FIRST COMPARISON ALWAYS FALSE
   // THIS WILL ALLOW TO DISABLE SOME SUBROUTINES
   if(false)
     delayMicroseconds(0);
+  #ifdef enable_temp
   else if(strcmp(command,"temp") == 0)
   {
     Serial.println("BEFORE TEMP");
@@ -81,6 +85,34 @@ void callSubfunction(char (*commands)[COMMAND_LENGTH])
     temp = new tempclass(commands);    //pass commands buffer to temp class
     temp->process(UDP_Reply_Buffer);   //process the commands and put results in reply buffer
   }
+  #endif
+  // DIGITAL INPUTS AND OUTPUTS
+  #ifdef enable_digital
+    // WRITE DIGITAL OUTPUT PIN
+    else if(strcmp(command,"write") == 0)
+    {
+      pin = atoi(commands[1]);
+      level = atoi(commands[2]);
+
+      pinMode(pin, OUTPUT);
+      digitalWrite(pin, level);
+
+      strcpy (UDP_Reply_Buffer,"OK");
+    }
+    // READING DIGITAL INPUT PIN
+    else if(strcmp(command,"read") == 0)
+    {
+      pin = atoi(commands[1]);
+      pinMode(pin, INPUT_PULLUP);
+      level = digitalRead(pin);
+
+      char read_buf[2];
+      read_buf[0] = level+48;
+      read_buf[1] = 0;
+
+      strcpy (UDP_Reply_Buffer,read_buf);
+    }
+  #endif
   else
   {
     Serial.println("FAIL TO FIND FUNCTION");
