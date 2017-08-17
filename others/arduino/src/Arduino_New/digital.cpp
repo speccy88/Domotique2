@@ -9,6 +9,8 @@
 #include "error_codes.h"                                                               // Includes error codes and pins definitions (min/max pin numbers)
 #include "ip_address.h"
 
+#include <avr/io.h>
+
 digclass* digital;
 
 digclass::digclass(char (*commands_ptr)[COMMAND_LENGTH])
@@ -18,10 +20,9 @@ digclass::digclass(char (*commands_ptr)[COMMAND_LENGTH])
 
 void digclass::process(char* return_str)
 {
-  Serial.println("PROCESS CLASS");
+  Serial.println("PROCESS CLASS");  
   int pin = atoi(commands[1]);
   int level = atoi(commands[2]);
-  char units = commands[2];
   int duration = atoi(commands[3]);
   int address = atoi(commands[3]);
   int startstop = atoi(commands[4]);
@@ -62,7 +63,7 @@ void digclass::process(char* return_str)
   // FREQUENCY COUNTER - READ PIN FREQUENCY in Hz
   #ifdef enable_frequency    
     else if(strcmp(commands[0],"freq") == 0)
-      sprintf(return_str, "%d", FREQ(pin));
+      dtostrf(FREQ(pin), 3, 1, return_str);
   #else
     else if(strcmp(commands[0],"freq") == 0)
       sprintf(return_str, "%d", ERROR_COMMAND_NOT_ACTIVATED);
@@ -94,7 +95,7 @@ void digclass::process(char* return_str)
   // commands[2] should be 0 for 
   #ifdef enable_temp
     else if(strcmp(commands[0],"temp") == 0)
-      sprintf(return_str, "%d,%d,%d", temp.TEMPERATURE(pin, units, 1), temp.TEMPERATURE(pin, units, 2), temp.TEMPERATURE(pin, units, 3));
+      sprintf(return_str, "%d,%d,%d", temp.TEMPERATURE(pin, level, 1), temp.TEMPERATURE(pin, level, 2), temp.TEMPERATURE(pin, level, 3));
   #else
     else if(strcmp(commands[0],"temp") == 0)
       sprintf(return_str, "%d", ERROR_COMMAND_NOT_ACTIVATED);
@@ -179,6 +180,8 @@ int digclass::ANALOG(int pin)
     pin += 14;
 
   if(pin >= analog_min && pin <= analog_max)
+
+  
     return((int)analogRead(pin));
   else
     return(ERROR_INVALID_ANALOGIN_PIN);
@@ -199,12 +202,12 @@ int digclass::PWM(int pin, int level)
     return(ERROR_INVALID_PWM_PIN);
 }
 
-int digclass::FREQ(int pin)
+double digclass::FREQ(int pin)
 {
-  int Htime;                                                 //Integer for storing high time
-  int Ltime;                                                 //Integer for storing low time
-  int frequency;                                             //Storing frequency (float???)
-  int TotalTime;                                             //Storing total cycle time (float???)
+  double Htime = 0;                                          //Integer for storing high time
+  double Ltime = 0;                                          //Integer for storing low time
+  double Ttime = 0;                                          //Storing total cycle time (float???)
+  double frequency = 0;                                      //Storing frequency (float???)
 
   if((dig_lo_min <= pin <= dig_lo_max) || (dig_hi_min <= pin <= dig_hi_max))
   {
@@ -212,15 +215,11 @@ int digclass::FREQ(int pin)
     Htime = pulseIn(pin,HIGH);                               //Read high time in microseconds (timeout default = 1s)
     Ltime = pulseIn(pin,LOW);                                //Read low time in microseconds (timeout default = 1s)
 
-    TotalTime = Htime+Ltime;
+    Ttime = Htime+Ltime;
 
-    if(TotalTime > 0)
-    {
-      frequency = (1000000/(Htime+Ltime))*10;                //Calculate frequency * 10
-      return(frequency);
-    }
-    else
-      return(0);                                             //Reply "0" means the input frequency is very low or none
+    frequency = Ttime > 0 ? 1000000/Ttime : 0;               //Calculate frequency in Hz            
+
+    return(frequency);
   }
   else
     return(ERROR_INVALID_DIGITAL_PIN);

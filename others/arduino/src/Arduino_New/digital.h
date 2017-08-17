@@ -9,7 +9,7 @@ class digclass
     int STATUS(int pin);
     int ANALOG(int pin);
     int PWM(int pin, int level);
-    int FREQ(int pin);
+    double FREQ(int pin);
     int TONE(int pin, int level, int duration, int startstop);
     void process(char* return_str);
   private:

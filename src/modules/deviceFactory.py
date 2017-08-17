@@ -5,7 +5,7 @@ def deviceFactory(devices_description):
     output_devices = []
 
     for desc in devices_description:
-        if desc["device_type"] == "arduino":
+        if desc["type"] == "arduino":
             if all(k in desc for k in ("mode", "ip", "pin")):
                 ### Arduino digital out pin
                 if desc["mode"] == "out":

@@ -37,6 +37,17 @@ def initAstral(self):
 def updateSun(self):
     self.sun_date = datetime.now().date()
     self.sun = self.location.sun(date=self.sun_date, local=True)
+
+def calculate_expression(expression, data):
+    exec_string = '_result = ({})'.format(expression)
+    try:
+        exec(exec_string, None, data)
+    except:
+        raise Exception('There is an error in the expression : {}'.format(expression))
+    result = data['_result']
+    del data['_result']
+    return result
+
     
 def device_loop(devices):
     input_devices, output_devices = devices
@@ -48,18 +59,12 @@ def device_loop(devices):
     print(sensors_data)
     
     for device in output_devices:
-        device_output = 0
         if device.enabled:
-            if device.time_enabled:
-                current_time = datetime.now().time()
-                if device.start_time < current_time < device.stop_time:
-                    device_output = 1
-                else:
-                    device_output = 0
+            if calculate_expression(device.expression, sensors_data):
+                device_output = 1
+            else:
+                device_output = 0
         else:
             device_output = 0
+            
         device.output = device_output
-
-    ### Need to implement loop to read analog devices
-
-    ### Need to implement loop to read DHT22 devices

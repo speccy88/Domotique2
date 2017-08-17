@@ -25,7 +25,7 @@ void tempclass::process(char* return_str)
 
 tempclass::tempclass(){}
 
-int tempclass::TEMPERATURE(int pin, char units, int request)
+int tempclass::TEMPERATURE(int pin, int units, int request)
 {
   #ifdef DEBUG
     Serial.println("INSIDE TEMP");
@@ -38,9 +38,9 @@ int tempclass::TEMPERATURE(int pin, char units, int request)
 
   float temp = -1000;
   
-  if(units == 'C')
+  if(units == 0)      //°C
     temp = dht.readTemperature(false);
-  else if(units == 'F')
+  else if(units == 1) //°F
     temp = dht.readTemperature(true);
   else
     return(ERROR_UNDEFINED_COMMAND); // Invalid units

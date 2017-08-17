@@ -5,7 +5,7 @@ class tempclass
   public:
     //tempclass(char (*commands_ptr)[COMMAND_LENGTH]);
     tempclass();
-    int TEMPERATURE(int pin, char units, int request);
+    int TEMPERATURE(int pin, int units, int request);
     //void process(char* return_str);
   /*private:
     char (*commands)[COMMAND_LENGTH];

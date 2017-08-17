@@ -44,7 +44,7 @@ class UDPStream(object):
             self.ioloop.remove_timeout(self._read_timeout)
         if self._read_callback:
             try:
-                data = self.socket.recv(4096)
+                data = self.socket.recv(1024)
             except:
                 # conn refused??
                 data = None

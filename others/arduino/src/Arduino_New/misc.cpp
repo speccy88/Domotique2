@@ -23,7 +23,10 @@ char* floatToString(float f, int n)
 
   integer_part = floor(f);
   fractional_part = (f-(integer_part))*pow(10,n);
-
+  
+  Serial.println(integer_part);
+  Serial.println(fractional_part);
+  
   char* str_buffer = (char*)malloc(16 * sizeof(char));
   sprintf(str_buffer, "%d.%d", integer_part, fractional_part);
   return str_buffer;

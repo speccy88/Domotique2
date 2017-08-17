@@ -13,7 +13,7 @@
 #define UDP_REPLY_BUFLEN 32                    // Define length of the reply string
 #define UDP_RECV_BUFLEN  100                   // tcp/ip send and receive buffer
 
-//#define DEBUG                                  // Comment this line to remove all serial data to free up some memory
+#define DEBUG                                  // Comment this line to remove all serial data to free up some memory
 
 #include "error_codes.h"                       // Includes error codes and pins definitions (min/max pin numbers)
 
