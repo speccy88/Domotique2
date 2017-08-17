@@ -5,11 +5,10 @@
   {
     public:
       gpioclass();
-      int SET(int pin, int level, int address);
+      int SET(int pin, unsigned int level, int address);
       int READ(int pin, int address);
-      int STATUS(int pin, int address);
   };
   
-  extern gpioclass expander;
+  extern gpioclass gpio;
 
 #endif

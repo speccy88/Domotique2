@@ -8,12 +8,12 @@
 // This ensures you personnal data such as IP addresses doesn't get on github to become public
 #include "ip_address.h"
 
-#include "digital.h"
+#include "io.h"
 
 #define UDP_REPLY_BUFLEN 32                    // Define length of the reply string
 #define UDP_RECV_BUFLEN  100                   // tcp/ip send and receive buffer
 
-#define DEBUG                                  // Comment this line to remove all serial data to free up some memory
+//#define DEBUG                                  // Comment this line to remove all serial data to free up some memory
 
 #include "error_codes.h"                       // Includes error codes and pins definitions (min/max pin numbers)
 
@@ -58,15 +58,13 @@ void udpReceive(uint16_t dest_port, uint8_t src_ip[IP_LEN], uint16_t src_port, c
 void callSubfunction(char (*commands)[COMMAND_LENGTH])
 {
   char* command = commands[0];
-  
-  digital = new digclass(commands);    //pass commands buffer to temp class
-  digital->process(UDP_Reply_Buffer);  //process the commands and put results in reply buffer
+
+  io = new ioclass(commands);    //pass commands buffer to temp class
+  io->process(UDP_Reply_Buffer);  //process the commands and put results in reply buffer
 }
 
 void UDPreply()
 {
-  //strcpy(UDP_Reply_Buffer, str);
-
   #ifdef DEBUG
     Serial.print("Reply: ");
     Serial.println(UDP_Reply_Buffer);
@@ -86,7 +84,6 @@ void setup()
   wdt_disable();
   //wdt_enable(WDTO_8S);
 
-  
   #ifdef DEBUG
     Serial.begin(9600);
     Serial.println("[START]");

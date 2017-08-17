@@ -6,26 +6,9 @@
 #include "DHT.h"
 #define DHTTYPE DHT22                                                                  // DHT 22  (AM2302), AM2321
 
-//tempclass* temp;
-
-/*tempclass::tempclass(char (*commands_ptr)[COMMAND_LENGTH])
-{
-  commands = commands_ptr;
-}
-
-void tempclass::process(char* return_str)
-{
-  Serial.println("PROCESS CLASS");
-  int pin = atoi(commands[1]);
-  char units = (char)*commands[2];
-  
-  sprintf(return_str, "%d", TEMPERATURE(pin, units, 1));
-  //sprintf(return_str, "%d,%d,%d", TEMPERATURE(pin, units, 1), TEMPERATURE(pin, units, 2), TEMPERATURE(pin, units, 3));
-}*/
-
 tempclass::tempclass(){}
 
-int tempclass::TEMPERATURE(int pin, int units, int request)
+double tempclass::READ(int pin, int units, int request)
 {
   #ifdef DEBUG
     Serial.println("INSIDE TEMP");
@@ -36,7 +19,7 @@ int tempclass::TEMPERATURE(int pin, int units, int request)
   DHT dht(pin, DHTTYPE);
   dht.begin();
 
-  float temp = -1000;
+  double temp = -1000.0;
   
   if(units == 0)      //°C
     temp = dht.readTemperature(false);
@@ -49,8 +32,8 @@ int tempclass::TEMPERATURE(int pin, int units, int request)
     Serial.println(temp);
   #endif
 
-  float hum = dht.readHumidity();
-  float hi = dht.computeHeatIndex(temp, hum);
+  double hum = dht.readHumidity();
+  double hi = dht.computeHeatIndex(temp, hum);
 
   if (isnan(temp) || isnan(hum) || isnan(hi))    // if values are not numbers
     return(ERROR_SENSOR_READ); // Reading error
@@ -63,7 +46,7 @@ int tempclass::TEMPERATURE(int pin, int units, int request)
     
     switch(request)
     {
-      case 1: // Temperature
+      case TEMP: // Temperature
       {
         #ifdef DEBUG
           Serial.println("Command: Read Temperature/Humidity Success");
@@ -73,10 +56,10 @@ int tempclass::TEMPERATURE(int pin, int units, int request)
           Serial.println(units);
         #endif
         
-        return((int)(temp*10));
+        return(temp);
       }
       break;
-      case 2: // Humidity
+      case HUM: // Humidity
       {
         #ifdef DEBUG
           Serial.print("Humidity: ");
@@ -84,10 +67,10 @@ int tempclass::TEMPERATURE(int pin, int units, int request)
           Serial.println(" %");
         #endif
         
-        return((int)(hum*10));
+        return(hum);
       }
       break;
-      case 3: // Heat Index
+      case HEAT: // Heat Index
       {
         #ifdef DEBUG
           Serial.print("Humidex: ");
@@ -96,7 +79,7 @@ int tempclass::TEMPERATURE(int pin, int units, int request)
           Serial.println(units);
         #endif
 
-        return((int)(hi*10));
+        return(hi);
       }
       break;
       default: // Error

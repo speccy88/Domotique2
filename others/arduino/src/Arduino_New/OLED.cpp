@@ -43,7 +43,7 @@ int oledclass::SEND(int NbrLines, char Line1, char Line2, char Line3, char Line4
     display.write(Line7);
     display.setCursor(0, 7); //(y, x)
     display.write(Line8);
-    return(1);
+    return(OPERATION_SUCCESSFUL);
   }
   else if(NbrLines == 5)
   {
@@ -62,7 +62,7 @@ int oledclass::SEND(int NbrLines, char Line1, char Line2, char Line3, char Line4
     display.setTextSize(1, 1);
     display.setCursor(0, 7); //(y, x)
     display.write(Line5);
-    return(1);
+    return(OPERATION_SUCCESSFUL);
   }
   else if(NbrLines == 2)
   {
@@ -74,7 +74,7 @@ int oledclass::SEND(int NbrLines, char Line1, char Line2, char Line3, char Line4
     display.setCursor(0, 3); //(y, x)
     display.setTextSize(4, 1);
     display.write(Line2);
-    return(1);
+    return(OPERATION_SUCCESSFUL);
   }
   else
     return(ERROR_COMMAND_NOT_ACTIVATED);

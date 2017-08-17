@@ -16,6 +16,7 @@ int getIndex(const char* string, char toFind)
     return (ptr - string);
 }
 
+/*
 char* floatToString(float f, int n)
 {
   int integer_part; 
@@ -23,12 +24,13 @@ char* floatToString(float f, int n)
 
   integer_part = floor(f);
   fractional_part = (f-(integer_part))*pow(10,n);
-  
-  Serial.println(integer_part);
-  Serial.println(fractional_part);
+  #ifdef DEBUG
+    Serial.println(integer_part);
+    Serial.println(fractional_part);
+  #endif
   
   char* str_buffer = (char*)malloc(16 * sizeof(char));
   sprintf(str_buffer, "%d.%d", integer_part, fractional_part);
   return str_buffer;
 }
-
+*/

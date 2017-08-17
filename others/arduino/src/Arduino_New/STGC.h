@@ -5,7 +5,7 @@
   {
     public:
       stgcclass();
-      int READ(int one, int two, int three, int four, int five);
+      int READ(int pin1, int pin2, int pin3, int pin4, int pin5, int zero);
   };
   
   extern stgcclass STGC;
