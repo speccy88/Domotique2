@@ -2,7 +2,10 @@ class baroclass
 {
   public:
     baroclass();
-    double PRES(int pin);
+    double READ(int select);
+    double PRESSURE();
+    double TEMPERATURE(bool units);
+    double ALTITUDE();
 };
 
 extern baroclass baro;

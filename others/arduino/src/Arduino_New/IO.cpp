@@ -60,6 +60,8 @@ void ioclass::process(char* return_str)
 
   // GPIO EXPANDER
   // GPIO EXPANDER BASED ON PCF8575 (or PCF8574 with some modifications)
+  // Pins 0-15
+  // Addresses 0-7
   #ifdef enable_expander
     else if(strcmp(commands[0],"expwrite") == 0)
       dtostrf(gpio.SET(pin, level, address), 1, 0, return_str);
@@ -94,7 +96,7 @@ void ioclass::process(char* return_str)
   // READ BAROMETRIC PRESSURE USING BMP280
   #ifdef enable_baro
     else if(strcmp(commands[0],"pres") == 0)
-      dtostrf(baro.PRES(pin), 5, 3, return_str);
+      dtostrf(baro.READ(atoi(commands[1])), 5, 3, return_str);
   #else
     else if(strcmp(commands[0],"pres") == 0)
       dtostrf(ERROR_COMMAND_NOT_ACTIVATED, 4, 0, return_str);

@@ -1,3 +1,6 @@
+//PINOUT:
+//SDA = A4
+//SCL = A5
 #include "Arduino.h"
 #include "expander.h"
 
@@ -8,14 +11,14 @@
 
 PCF8575 pcf8575;
 
-int hex;
-
 gpioclass::gpioclass(){}
 
 int gpioclass::SET(int pin, unsigned int level, int address)
 {
-  hex = address + 32;
+  int hex = address + 32;//0x20 to 0x27
   pcf8575.begin(hex); //0x20 to 0x27
+  level = level == 1 ? 0 : 1; //Invert logic since output is reversed (PCF8575C are used)
+  
   if((exp_lo_min <= pin <= exp_lo_max) || (exp_hi_min <= pin <= exp_hi_max))           //Pin validation
   {
     pcf8575.pinMode(pin, OUTPUT);
@@ -28,7 +31,7 @@ int gpioclass::SET(int pin, unsigned int level, int address)
 
 int gpioclass::READ(int pin, int address)
 {
-  hex = address + 32;
+  int hex = address + 32;
   pcf8575.begin(0x20); //0x20 to 0x27
   if((exp_lo_min <= pin <= exp_lo_max) || (exp_hi_min <= pin <= exp_hi_max))           //Pin validation
   {

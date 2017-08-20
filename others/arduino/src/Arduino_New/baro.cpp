@@ -1,59 +1,115 @@
+//PINOUT:
+//SDA = A4
+//SCL = A5
 #include "Arduino.h"
 #include "baro.h"
+#include "ip_address.h"
 
 #include "error_codes.h"                                                               // Includes error codes and pins definitions (min/max pin numbers)
 
 #include <Wire.h>
 #include <SPI.h>
 #include <Adafruit_Sensor.h>
+
+// BME280 (PRES, TEMP, ALTITUDE)
 #include <Adafruit_BMP280.h>
+Adafruit_BMP280 barosensor; // I2C
+
+// BME280 (PRES, TEMP, HUMIDITY, ALTITUDE)
+//#include <Adafruit_BME280.h>
+//Adafruit_BME280 barosensor; // I2C
 
 baroclass::baroclass(){}
 
-double baroclass::PRES(int pin)
+double baroclass::READ(int select)
 {
-  int BMP_CS = pin;
-  float pres = 0;
-  
-  // For I2C, uncomment line
-  //Adafruit_BMP280 bmp; // I2C
+  Serial.println(select);
+  if(select < 1 || select > 4)
+    return(ERROR_SENSOR_REQUEST_FAIL);
 
-  // For SPI hardware, uncomment lines
-  Adafruit_BMP280 bmp(BMP_CS); // hardware SPI  
-
-  // For SPI on different digital pins, uncomment lines
-  //int BMP_SCK = 13
-  //int BMP_MISO = 12
-  //int BMP_MOSI = 11 
-  //Adafruit_BMP280 bmp(BMP_CS, BMP_MOSI, BMP_MISO,  BMP_SCK);
-
-  if (!bmp.begin())  
+  if(!barosensor.begin())  
   {
     #ifdef DEBUG
-      Serial.println("Could not find a valid BMP280 sensor, check wiring!");
+      Serial.println("Could not find a valid BMx280 sensor, check wiring ans sensor!");
     #endif
   
     return(ERROR_SENSOR_READ); //Invalid sensor or not found
   }
 
-  pres = bmp.readPressure();
+  if(select == 1)
+    return(baro.PRESSURE());
+  if(select == 2)
+    return(baro.TEMPERATURE(false));
+  if(select == 3)
+    return(baro.TEMPERATURE(true));
+  if(select == 4)
+    return(baro.ALTITUDE());
+}
 
-  if(isnan(pres))
-  {
+double baroclass::PRESSURE()
+{
+  #ifdef baro_pres
+    float pres = barosensor.readPressure();
+  
+    if(isnan(pres))
+      return(ERROR_SENSOR_READ); // Reading error
+  
     #ifdef DEBUG
-      Serial.println("ERROR : Read failed");
+      Serial.print(F("Pressure: "));
+      Serial.print(pres);
+      Serial.println(" Pa");
     #endif
-    
-    return(ERROR_SENSOR_READ); // Reading error
-  }  
-
-  #ifdef DEBUG
-    Serial.print(F("Pressure: "));
-    Serial.print(pres);
-    Serial.println(" Pa");
+   
+    return(pres/1000); // Pressure is read in Pa, turns it into kPa and accept 3 decimals in the double to string conversion
+  #else
+    return(ERROR_COMMAND_NOT_ACTIVATED);
   #endif
- 
-  return(pres/1000); // Pressure is read in Pa, turns it into kPa and accept 3 decimals in the double to string conversion
+}
+
+double baroclass::TEMPERATURE(bool units)
+{
+  #ifdef baro_temp
+    float temp = barosensor.readTemperature();
+  
+    if(isnan(temp))
+      return(ERROR_SENSOR_READ); // Reading error
+  
+    if(units)
+      temp = ((9.0/5.0) * temp) + 32.0;
+  
+    #ifdef DEBUG
+      Serial.print(F("Temperature: "));
+      Serial.print(temp);
+      if(units)
+        Serial.println(" *F");
+      else
+        Serial.println(" *C");
+    #endif
+   
+    return(temp); // Temperature is read in °C
+  #else
+    return(ERROR_COMMAND_NOT_ACTIVATED);
+  #endif
+}
+
+double baroclass::ALTITUDE()
+{
+  #ifdef baro_alt
+    float alt = barosensor.readAltitude(CALIBRATION);
+  
+    if(isnan(alt))
+      return(ERROR_SENSOR_READ); // Reading error
+  
+    #ifdef DEBUG
+      Serial.print(F("Altitude: "));
+      Serial.print(alt);
+      Serial.println(" m");
+    #endif
+   
+    return(alt); // Pressure is read in Pa, turns it into kPa and accept 3 decimals in the double to string conversion
+  #else
+    return(ERROR_COMMAND_NOT_ACTIVATED);
+  #endif
 }
 
 baroclass baro = baroclass();
