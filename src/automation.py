@@ -2,10 +2,13 @@ from datetime import datetime, timedelta
 from modules.deviceFactory import deviceFactory
 from astral import Astral, Location
 from datetime import datetime, timedelta
-import tornado.ioloop
+from tornado import gen, ioloop
+
 
 DELIMITER = ":"
 D = DELIMITER
+
+io_loop = ioloop.IOLoop.current()
 
 def stringToTime(text):
     return datetime.strptime(text, '%H:%M').time()
@@ -17,10 +20,8 @@ def init_device_loop(context):
 
     devices = deviceFactory(devices_description)
     context["devices"] = devices
-
-    pc = tornado.ioloop.PeriodicCallback(lambda: device_loop(devices), 1000)
-    pc.start()
-    context["pc"] = pc
+    
+    io_loop.spawn_callback(device_loop, devices)
 
 def initAstral(self):
     a = Astral()
@@ -38,33 +39,31 @@ def updateSun(self):
     self.sun_date = datetime.now().date()
     self.sun = self.location.sun(date=self.sun_date, local=True)
 
-def calculate_expression(expression, data):
-    exec_string = '_result = ({})'.format(expression)
-    try:
-        exec(exec_string, None, data)
-    except:
-        raise Exception('There is an error in the expression : {}'.format(expression))
-    result = data['_result']
-    del data['_result']
-    return result
 
-    
+
+@gen.coroutine    
 def device_loop(devices):
     input_devices, output_devices = devices
     sensors_data = {}
     
-    for device in input_devices:
-        sensors_data[device.name] = device.value
+    #Get all values of input devices
+    values = yield [device.value() for device in input_devices]
+    
+    #Put the values in a dict with the key being the input device name for each value
+    for value, device in zip(values, input_devices):
+        sensors_data[device.name] = value
     
     print(sensors_data)
     
     for device in output_devices:
         if device.enabled:
-            if calculate_expression(device.expression, sensors_data):
+            if device.calculate_expression(sensors_data):
                 device_output = 1
             else:
                 device_output = 0
         else:
             device_output = 0
             
-        device.output = device_output
+        yield device.output(device_output)
+        
+    io_loop.stop()

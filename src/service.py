@@ -1,7 +1,7 @@
-from tornado.ioloop import IOLoop
+from tornado import ioloop
 import http_server
 import couchdb
-import loop
+import automation
 
 ADR = 'http://127.0.0.1:5984/'
 
@@ -18,9 +18,9 @@ except:
 context = {"db": db}
 
 app = http_server.Application(context)
+app.listen(8000) 
 
+io_loop = ioloop.IOLoop.current()
 
-#Run server and process loop
-app.listen(8000)  
-IOLoop.instance().spawn_callback(loop.init_device_loop, context)
-IOLoop.instance().start()
+automation.init_device_loop(context)
+io_loop.start()
