@@ -1,58 +1,47 @@
-#http://kyle.graehl.org/coding/2012/12/07/tornado-udpstream.html
-from tornado.ioloop import IOLoop
+from tornado import gen
+import tornado.ioloop
+import socket
+import time
 
-class UDPStream(object):
-    def __init__(self, socket, in_ioloop=None):
-        self.socket = socket
-        self._state = None
-        self._read_callback = None
-        self.ioloop = in_ioloop or IOLoop.instance()
-
-    def _add_io_state(self, state):
-        if self._state is None:
-            self._state = tornado.ioloop.IOLoop.ERROR | state
-            self.ioloop.add_handler(
-                self.socket.fileno(), self._handle_events, self._state)
-        elif not self._state & state:
-            self._state = self._state | state
-            self.ioloop.update_handler(self.socket.fileno(), self._state)
-
-    def send(self,msg):
-        return self.socket.send(msg)
-
-    def recv(self,sz):
-        return self.socket.recv(sz)
+class UDP_Communication:
+    def __init__(self, ip, port, timeout=6):
+        self.ioloop = tornado.ioloop.IOLoop.current()
+        self.callback = None
+        self.ip = ip
+        self.port = port
+        self.timeout = timeout
+        
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock.setblocking(0)
+        
+    def _handle_input(self, fd, events):
+        #print("Inside _handle_input")       
+        #print("FD={} events={}".format(fd, events))
+        try:
+            data, addr = self.sock.recvfrom(1024)
+            #print("DATA = {} ADDRESS = {}".format(data, addr))
+            if self._read_timeout:
+                #print("Removing timeout")
+                self.ioloop.remove_timeout(self._read_timeout)
+                self.callback(data.decode())
+        except:
+            pass
+        
+    def _read(self, callback=None):
+        self.callback = callback
+        self._read_timeout = self.ioloop.call_later(self.timeout, self._timeout )
+        self.ioloop.add_handler(self.sock.fileno(), self._handle_input, self.ioloop.READ)
     
-    def close(self):
-        self.ioloop.remove_handler(self.socket.fileno())
-        self.socket.close()
-        self.socket = None
-
-    def read_chunk(self, callback=None, timeout=4):
-        self._read_callback = callback
-        self._read_timeout = self.ioloop.add_timeout( time.time() + timeout, 
-            self.check_read_callback )
-        self._add_io_state(self.ioloop.READ)
-
-    def check_read_callback(self):
-        if self._read_callback:
-            # XXX close socket?
-            self._read_callback(None, error='timeout');
-
-    def _handle_read(self):
-        if self._read_timeout:
-            self.ioloop.remove_timeout(self._read_timeout)
-        if self._read_callback:
-            try:
-                data = self.socket.recv(1024)
-            except:
-                # conn refused??
-                data = None
-            self._read_callback(data);
-            self._read_callback = None
-
-    def _handle_events(self, fd, events):
-        if events & self.ioloop.READ:
-            self._handle_read()
-        if events & self.ioloop.ERROR:
-            logging.error('%s event error' % self)
+    def _timeout(self):
+        #print("Inside _timeout")
+        self.ioloop.remove_handler(self.sock.fileno())
+        self.callback("Timeout")
+         
+    
+    @gen.coroutine
+    def send(self, message):
+        ADDR = (self.ip, self.port)
+        MESSAGE = message.encode("ascii")
+        self.sock.sendto(MESSAGE, ADDR)
+        reply = yield gen.Task(self._read)
+        return reply
