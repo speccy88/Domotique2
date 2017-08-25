@@ -95,10 +95,27 @@ void ioclass::process(char* return_str)
   // BAROMETRIC PRESSURE
   // READ BAROMETRIC PRESSURE USING BMP280
   #ifdef enable_baro
-    else if(strcmp(commands[0],"pres") == 0)
-      dtostrf(baro.READ(atoi(commands[1])), 5, 3, return_str);
+    else if((strcmp(commands[0],"presbmp") == 0) || (strcmp(commands[0],"presbme") == 0))
+    {
+      bool sensor = strcmp(commands[0],"presbme") == 0 ? true : false;
+      char pressure[10], temperature[10], altitude[10], humidity[10], heatindex[10];
+
+      dtostrf(baro.READ(sensor, atoi(commands[1]), 1), 5, 3, pressure);    // kPa
+      dtostrf(baro.READ(sensor, atoi(commands[1]), 2), 3, 1, temperature); // °C or °F
+      dtostrf(baro.READ(sensor, atoi(commands[1]), 3), 1, 0, altitude);    // m
+      
+
+      // Returns 0.0 if reading a BMP280 sensor, returns values for BME280 sensor
+      dtostrf(baro.READ(sensor, atoi(commands[1]), 4), 3, 1, humidity);    // %
+      dtostrf(baro.READ(sensor, atoi(commands[1]), 5), 3, 1, heatindex);   // °C or °F*/
+
+      if(sensor)
+        sprintf(return_str, "%s;%s;%s;%s;%s", pressure, temperature, altitude, humidity, heatindex);
+      else
+        sprintf(return_str, "%s;%s;%s", pressure, temperature, altitude);
+    }
   #else
-    else if(strcmp(commands[0],"pres") == 0)
+    else if((strcmp(commands[0],"presbmp") == 0) || (strcmp(commands[0],"presbme") == 0))
       dtostrf(ERROR_COMMAND_NOT_ACTIVATED, 4, 0, return_str);
   #endif
 
@@ -106,7 +123,14 @@ void ioclass::process(char* return_str)
   // READ SINGLE TRACK GRAY CODE ENCODER
   #ifdef enable_stgc
     else if(strcmp(commands[0],"stgc") == 0)
-      dtostrf(STGC.READ(atoi(commands[1]), atoi(commands[2]), atoi(commands[3]), atoi(commands[4]), atoi(commands[5]), atoi(commands[6])), 1, 0, return_str);
+      {
+        char* reply_test = STGC.READ(atoi(commands[1]), atoi(commands[2]), atoi(commands[3]), atoi(commands[4]), atoi(commands[5]), atoi(commands[6]));
+        Serial.println(reply_test);
+
+        sprintf(return_str, "%s", reply_test);
+        
+        //dtostrf(STGC.READ(atoi(commands[1]), atoi(commands[2]), atoi(commands[3]), atoi(commands[4]), atoi(commands[5]), atoi(commands[6])), 1, 0, return_str);
+      }
   #else
     else if(strcmp(commands[0],"stgc") == 0)
       dtostrf(ERROR_COMMAND_NOT_ACTIVATED, 4, 0, return_str);

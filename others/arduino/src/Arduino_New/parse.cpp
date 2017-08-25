@@ -38,6 +38,7 @@ char (*parseData(const char* stringData))[COMMAND_LENGTH]
     
     delimiter_qty += 1;
   }
+  Serial.println(delimiter_qty);
 
   // Split and store data according to delimiters positions
   int nextPosition;
