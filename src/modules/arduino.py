@@ -28,7 +28,7 @@ class Arduino(Device):
             print("Device ({}) command ({})".format(self.name,cmd))
             data = yield self.udp_comm.send(cmd)
             print("reply = {}".format(data))
-            return data
+            return int(data)
         else:
             return None
         

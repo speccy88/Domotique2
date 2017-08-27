@@ -22,5 +22,5 @@ app.listen(8000)
 
 io_loop = ioloop.IOLoop.current()
 
-automation.init_device_loop(context)
+io_loop.spawn_callback(automation.init_device_loop, context)
 io_loop.start()

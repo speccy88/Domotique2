@@ -13,6 +13,7 @@ io_loop = ioloop.IOLoop.current()
 def stringToTime(text):
     return datetime.strptime(text, '%H:%M').time()
 
+@gen.coroutine 
 def init_device_loop(context):
     db = context["db"]
     devices_description = [db[device] for device in db]
@@ -21,7 +22,14 @@ def init_device_loop(context):
     devices = deviceFactory(devices_description)
     context["devices"] = devices
     
-    io_loop.spawn_callback(device_loop, devices)
+    i = 0
+    while True:
+        i+=1
+        yield device_loop(devices)
+        print("*** {} loop done ***".format(i))
+        print()
+        yield gen.sleep(2)
+
 
 def initAstral(self):
     a = Astral()
@@ -39,7 +47,15 @@ def updateSun(self):
     self.sun_date = datetime.now().date()
     self.sun = self.location.sun(date=self.sun_date, local=True)
 
-
+def calculate_expression(expression, data):
+    data["__builtins__"] = None
+    try:
+        result = eval(expression, data)
+        print("Expression={} Data={} Result={}".format(expression, data, result))
+    except:
+        raise Exception('There is an error in the expression : {}'.format(expression))    
+    
+    return result
 
 @gen.coroutine    
 def device_loop(devices):
@@ -57,7 +73,7 @@ def device_loop(devices):
     
     for device in output_devices:
         if device.enabled:
-            if device.calculate_expression(sensors_data):
+            if calculate_expression(device.expression, sensors_data):
                 device_output = 1
             else:
                 device_output = 0
@@ -65,5 +81,3 @@ def device_loop(devices):
             device_output = 0
             
         yield device.output(device_output)
-        
-    io_loop.stop()

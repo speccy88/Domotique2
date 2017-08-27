@@ -13,6 +13,7 @@ class UDP_Communication:
         
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.setblocking(0)
+        self.ioloop.add_handler(self.sock.fileno(), self._handle_input, self.ioloop.READ)
         
     def _handle_input(self, fd, events):
         #print("Inside _handle_input")       
@@ -23,18 +24,19 @@ class UDP_Communication:
             if self._read_timeout:
                 #print("Removing timeout")
                 self.ioloop.remove_timeout(self._read_timeout)
-                self.callback(data.decode())
-        except:
+            
+            self.callback(data.decode('ascii','replace'))
+        except Exception as e:
+            print(e)
             pass
         
     def _read(self, callback=None):
         self.callback = callback
         self._read_timeout = self.ioloop.call_later(self.timeout, self._timeout )
-        self.ioloop.add_handler(self.sock.fileno(), self._handle_input, self.ioloop.READ)
+        #self.ioloop.add_handler(self.sock.fileno(), self._handle_input, self.ioloop.READ)
     
     def _timeout(self):
         #print("Inside _timeout")
-        self.ioloop.remove_handler(self.sock.fileno())
         self.callback("Timeout")
          
     
@@ -44,4 +46,5 @@ class UDP_Communication:
         MESSAGE = message.encode("ascii")
         self.sock.sendto(MESSAGE, ADDR)
         reply = yield gen.Task(self._read)
+        
         return reply
