@@ -3,10 +3,10 @@
 //SCL = A5
 #include "Arduino.h"
 #include "baro.h"
-#include "ip_address.h"
 #include "misc.h"
 
 #include "error_codes.h"                                                               // Includes error codes and pins definitions (min/max pin numbers)
+#include "ip_address.h"
 
 #include <Wire.h>
 #include <SPI.h>
@@ -38,13 +38,7 @@ double baroclass::READ(bool sensor, int units, int select)
   {
     #ifdef baro_bme
       if(!baroBME.begin())  
-      {
-        #ifdef DEBUG
-          Serial.println("Could not find a valid BME280 sensor, check wiring and sensor!");
-        #endif
-      
-        return(ERROR_SENSOR_READ); //Invalid sensor or not found
-      }
+        return(ERROR_SENSOR); //Invalid sensor or not found
     #else
       return(ERROR_COMMAND_NOT_ACTIVATED);
     #endif
@@ -53,13 +47,7 @@ double baroclass::READ(bool sensor, int units, int select)
   {
     #ifdef baro_bmp
       if(!baroBMP.begin())  
-      {
-        #ifdef DEBUG
-          Serial.println("Could not find a valid BMP280 sensor, check wiring and sensor!");
-        #endif
-
-        return(ERROR_SENSOR_READ); //Invalid sensor or not found
-      }
+        return(ERROR_SENSOR); //Invalid sensor or not found
     #else
       return(ERROR_COMMAND_NOT_ACTIVATED);
     #endif
@@ -85,18 +73,17 @@ double baroclass::PRESSURE(bool sensor)
 
     #ifdef baro_bmp
       pres = sensor ? 0.0 : baroBMP.readPressure();
-    #endif
-    #ifdef baro_bme
+    #else if baro_bme
       pres = sensor ? baroBME.readPressure() : 0.0;
     #endif
   
     if(isnan(pres))
-      return(ERROR_SENSOR_READ); // Reading error
+      return(ERROR_SENSOR); // Reading error
   
     #ifdef DEBUG
       Serial.print(F("Pressure: "));
-      Serial.print(pres);
-      Serial.println(" Pa");
+      Serial.print(pres/1000);
+      Serial.println(" kPa");
     #endif
    
     return(pres/1000); // Pressure is read in Pa, turns it into kPa and accept 3 decimals in the double to string conversion
@@ -119,7 +106,7 @@ double baroclass::TEMPERATURE(bool sensor, bool isFahrenheit)
     #endif
   
     if(isnan(temp))
-      return(ERROR_SENSOR_READ); // Reading error
+      return(ERROR_SENSOR); // Reading error
   
     if(isFahrenheit)
       temp = convertCtoF(temp);
@@ -149,7 +136,7 @@ double baroclass::ALTITUDE(bool sensor)
     #endif
   
     if(isnan(alt))
-      return(ERROR_SENSOR_READ); // Reading error
+      return(ERROR_SENSOR); // Reading error
   
     #ifdef DEBUG
       Serial.print(F("Altitude: "));

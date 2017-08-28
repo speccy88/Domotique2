@@ -17,7 +17,7 @@ int gpioclass::SET(int pin, unsigned int level, int address)
 {
   int hex = address + 32;//0x20 to 0x27
   pcf8575.begin(hex); //0x20 to 0x27
-  level = level == 1 ? 0 : 1; //Invert logic since output is reversed (PCF8575C are used)
+  level = level == 1 ? 0 : 1; //Invert logic since output is reversed (if PCF8575C are used)
   
   if((exp_lo_min <= pin <= exp_lo_max) || (exp_hi_min <= pin <= exp_hi_max))           //Pin validation
   {

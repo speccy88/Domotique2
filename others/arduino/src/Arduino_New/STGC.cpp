@@ -29,7 +29,11 @@ char* stgcclass::READ(int pin1, int pin2, int pin3, int pin4, int pin5, int zero
             pin_ok = true;
 
   if(!pin_ok)
-    return(char(ERROR_INVALID_DIGITAL_PIN));
+  {
+    char* str_buffer = (char*)malloc(5);
+    sprintf(str_buffer, "%d", ERROR_INVALID_DIGITAL_PIN);
+    return(str_buffer);
+  }
 
   pinMode(pin1, INPUT_PULLUP);
   pinMode(pin2, INPUT_PULLUP);
@@ -47,22 +51,30 @@ char* stgcclass::READ(int pin1, int pin2, int pin3, int pin4, int pin5, int zero
     if(pins[i] == 1)
       index |= (1 << i);
 
+  int angle_read = table[index];
   // displays orientation using table lookup
   #ifdef DEBUG
-    Serial.println(table[index]);
+    Serial.print("Angle: ");
+    Serial.println(angle_read);
   #endif
 
-  int angle_read = table[index];
-
   if(angle_read == -1)
-    return(char(ERROR_SENSOR_READ));
+  {
+    char* str_buffer = (char*)malloc(5);
+    sprintf(str_buffer, "%d", ERROR_READING);
+    return(str_buffer);
+  }
 
   angle_read -= zero;
   if(angle_read < 0)
     angle_read += 360;
 
   if(angle_read > 360 || angle_read < 0)
-    return(char(ERROR_SENSOR_READ));
+  {
+    char* str_buffer = (char*)malloc(5);
+    sprintf(str_buffer, "%d", ERROR_READING);
+    return(str_buffer);
+  }
 
   return(COMPASS(angle_read));
 }
@@ -88,7 +100,9 @@ char* stgcclass::COMPASS(int angle)
     if(angle > 292.5 && angle <= 337.5) //NW
       compass_str = "NW";
   #else
-    //Todo
+    char* str_buffer = (char*)malloc(5);
+    sprintf(str_buffer, "%d", angle);
+    compass_str = str_buffer;
   #endif
 
   return(compass_str);

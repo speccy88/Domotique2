@@ -59,7 +59,7 @@ void ioclass::process(char* return_str)
   #endif
 
   // GPIO EXPANDER
-  // GPIO EXPANDER BASED ON PCF8575 (or PCF8574 with some modifications)
+  // GPIO EXPANDER BASED ON PCF8575/C (or PCF8574 with some modifications)
   // Pins 0-15
   // Addresses 0-7
   #ifdef enable_expander
@@ -76,16 +76,17 @@ void ioclass::process(char* return_str)
   
   // TEMPERATURE/HUMIDITY
   // READ TEMPERATURE, HUMIDITY AND HEAT INDEX USING DHT22
-  // commands[2] should be 0 for 
+  // commands[2] should be 0 for °C
   #ifdef enable_temp
     else if(strcmp(commands[0],"temp") == 0)
     {
-      char *temperature, *humidity, *heatindex;
+      //char *temperature, *humidity, *heatindex;
+      char temperature[10], humidity[10], heatindex[10];
       dtostrf(temp.READ(pin, level, TEMP), 3, 1, temperature);
       dtostrf(temp.READ(pin, level, HUM),  3, 1, humidity);
       dtostrf(temp.READ(pin, level, HEAT), 3, 1, heatindex);
-
       sprintf(return_str, "%s;%s;%s", temperature, humidity, heatindex);
+      Serial.println(return_str);
     }
   #else
     else if(strcmp(commands[0],"temp") == 0)
@@ -100,14 +101,15 @@ void ioclass::process(char* return_str)
       bool sensor = strcmp(commands[0],"presbme") == 0 ? true : false;
       char pressure[10], temperature[10], altitude[10], humidity[10], heatindex[10];
 
-      dtostrf(baro.READ(sensor, atoi(commands[1]), 1), 5, 3, pressure);    // kPa
-      dtostrf(baro.READ(sensor, atoi(commands[1]), 2), 3, 1, temperature); // °C or °F
-      dtostrf(baro.READ(sensor, atoi(commands[1]), 3), 1, 0, altitude);    // m
-      
+      int units = atoi(commands[1]);
+
+      dtostrf(baro.READ(sensor, units, 1), 5, 3, pressure);    // kPa
+      dtostrf(baro.READ(sensor, units, 2), 3, 1, temperature); // °C or °F
+      dtostrf(baro.READ(sensor, units, 3), 1, 0, altitude);    // m
 
       // Returns 0.0 if reading a BMP280 sensor, returns values for BME280 sensor
-      dtostrf(baro.READ(sensor, atoi(commands[1]), 4), 3, 1, humidity);    // %
-      dtostrf(baro.READ(sensor, atoi(commands[1]), 5), 3, 1, heatindex);   // °C or °F*/
+      dtostrf(baro.READ(sensor, units, 4), 3, 1, humidity);    // %
+      dtostrf(baro.READ(sensor, units, 5), 3, 1, heatindex);   // °C or °F*/
 
       if(sensor)
         sprintf(return_str, "%s;%s;%s;%s;%s", pressure, temperature, altitude, humidity, heatindex);
@@ -128,8 +130,6 @@ void ioclass::process(char* return_str)
         Serial.println(reply_test);
 
         sprintf(return_str, "%s", reply_test);
-        
-        //dtostrf(STGC.READ(atoi(commands[1]), atoi(commands[2]), atoi(commands[3]), atoi(commands[4]), atoi(commands[5]), atoi(commands[6])), 1, 0, return_str);
       }
   #else
     else if(strcmp(commands[0],"stgc") == 0)
@@ -137,11 +137,11 @@ void ioclass::process(char* return_str)
   #endif
 
   // OLED DISPLAY WITH ASCII ONLY LIBRARIES
-  // This function is predefined to 2, 5 or 8 lines:
+  // This function is predefined for 2, 5 or 8 lines:
   // OLED DISPLAY USING SSD1306 128x64 (maybe 32 later)
   #ifdef enable_oled
     else if(strcmp(commands[0],"oled") == 0)
-      dtostrf(OLED.SEND(atoi(commands[1]), atoi(commands[2]), atoi(commands[3]), atoi(commands[4]), atoi(commands[5]), atoi(commands[6]), atoi(commands[7]), atoi(commands[8]), atoi(commands[9])), 1, 0, return_str);
+      dtostrf(OLED.SEND(atoi(commands[1]), commands[2], commands[3], commands[4], commands[5], commands[6], commands[7], commands[8], commands[9]), 1, 0, return_str);
   #else
     else if(strcmp(commands[0],"oled") == 0)
       dtostrf(ERROR_COMMAND_NOT_ACTIVATED, 4, 0, return_str);

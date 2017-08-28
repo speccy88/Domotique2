@@ -11,7 +11,7 @@
 #include "io.h"
 
 #define UDP_REPLY_BUFLEN 50                    // Define length of the reply string
-#define UDP_RECV_BUFLEN  100                   // tcp/ip send and receive buffer
+#define UDP_RECV_BUFLEN  200                   // tcp/ip send and receive buffer
 
 #include "error_codes.h"                       // Includes error codes and pins definitions (min/max pin numbers)
 

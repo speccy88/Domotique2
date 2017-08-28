@@ -36,7 +36,7 @@ double tempclass::READ(int pin, int units, int request)
   double hi = dht.computeHeatIndex(temp, hum);
 
   if (isnan(temp) || isnan(hum) || isnan(hi))    // if values are not numbers
-    return(ERROR_SENSOR_READ); // Reading error
+    return(ERROR_SENSOR); // Reading error
   else
   {
     #ifdef DEBUG
