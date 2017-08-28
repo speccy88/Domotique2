@@ -16,16 +16,6 @@ int getIndex(const char* string, char toFind)
     return (ptr - string);
 }
 
-double convertCtoF(double c)
-{
-  return c * 1.8 + 32;
-}
-
-double convertFtoC(double f)
-{
-  return (f - 32) * 0.55555;
-}
-
 /*
 char* floatToString(float f, int n)
 {

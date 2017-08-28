@@ -8,6 +8,7 @@ class baroclass
     double ALTITUDE(bool sensor);
     double HUMIDITY(bool sensor);
     double HEATINDEX(bool sensor, bool isFahrenheit);
+    double DEWPOINT(bool sensor, bool isFahrenheit);
 };
 
 extern baroclass baro;

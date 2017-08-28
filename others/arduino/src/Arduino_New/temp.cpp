@@ -1,5 +1,6 @@
 #include "Arduino.h"
 #include "temp.h"
+#include "meteo.h"
 
 #include "error_codes.h"                                                               // Includes error codes and pins definitions (min/max pin numbers)
 
@@ -8,18 +9,13 @@
 
 tempclass::tempclass(){}
 
-double tempclass::READ(int pin, int units, int request)
+double tempclass::READ(int pin, int units, int select)
 {
-  #ifdef DEBUG
-    Serial.println("INSIDE TEMP");
-    Serial.println(pin);
-    Serial.println(units);
-  #endif
-  
   DHT dht(pin, DHTTYPE);
   dht.begin();
 
   double temp = -1000.0;
+  double hum = dht.readHumidity();
   
   if(units == 0)      //°C
     temp = dht.readTemperature(false);
@@ -28,23 +24,13 @@ double tempclass::READ(int pin, int units, int request)
   else
     return(ERROR_UNDEFINED_COMMAND); // Invalid units
 
-  #ifdef DEBUG
-    Serial.println(temp);
-  #endif
+  double reply;
 
-  double hum = dht.readHumidity();
-  double hi = dht.computeHeatIndex(temp, hum);
-
-  if (isnan(temp) || isnan(hum) || isnan(hi))    // if values are not numbers
+  if (isnan(temp) || isnan(hum))    // if values are not numbers
     return(ERROR_SENSOR); // Reading error
   else
   {
-    #ifdef DEBUG
-      Serial.println("INSIDE CASE");
-      Serial.println(request);
-    #endif
-    
-    switch(request)
+    switch(select)
     {
       case TEMP: // Temperature
       {
@@ -56,9 +42,9 @@ double tempclass::READ(int pin, int units, int request)
           Serial.println(units);
         #endif
         
-        return(temp);
+        reply = temp;
+        break;
       }
-      break;
       case HUM: // Humidity
       {
         #ifdef DEBUG
@@ -67,11 +53,12 @@ double tempclass::READ(int pin, int units, int request)
           Serial.println(" %");
         #endif
         
-        return(hum);
+        reply = hum;
+        break;
       }
-      break;
       case HEAT: // Heat Index
       {
+        double hi = calcHeatIndex(temp, hum); // Need to add units conversion
         #ifdef DEBUG
           Serial.print("Humidex: ");
           Serial.print(hi, 1);
@@ -79,14 +66,29 @@ double tempclass::READ(int pin, int units, int request)
           Serial.println(units);
         #endif
 
-        return(hi);
+        reply = hi;
+        break;
       }
-      break;
+      case DEW: // Heat Index
+      {
+        double dp = calcDewPoint(temp, hum);  // Need to add units conversion
+        #ifdef DEBUG
+          Serial.print("Dewpoint: ");
+          Serial.print(dp, 1);
+          Serial.print(" ");
+          Serial.println(units);
+        #endif
+        
+        reply = dp;
+        break;
+      }
       default: // Error
       {
-        return(ERROR_SENSOR_REQUEST_FAIL); // Invalid command
+        reply = ERROR_SENSOR_REQUEST_FAIL; // Invalid command
+        break;
       }
-      break;
+
+      return(reply);
     }
   }
 }

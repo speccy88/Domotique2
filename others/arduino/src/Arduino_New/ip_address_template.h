@@ -24,6 +24,7 @@ static byte mymac[] = { 0xFF,0xFF,0xFF,0xFF,0xFF,0x01 };                        
     #define baro_alt          //Working
 
     #ifdef baro_bme
-      //#define baro_hum      //Untested
+      //#define baro_hum        //Untested
+      //#define baro_hi         //Untested
     #endif
   #endif

@@ -27,7 +27,7 @@ void ioclass::process(char* return_str)
   int address = atoi(commands[3]);
   int startstop = atoi(commands[4]);
 
-  // FIRST COMPARISON ALWAYS FALSE - THIS WILL ALLOW TO DISABLE SOME SUBROUTINES
+  // FIRST COMPARISON ALWAYS FALSE - THIS ALLOWS TO DISABLE SUBROUTINES
   if(false)
     delayMicroseconds(0);
   #ifdef enable_base
@@ -80,13 +80,11 @@ void ioclass::process(char* return_str)
   #ifdef enable_temp
     else if(strcmp(commands[0],"temp") == 0)
     {
-      //char *temperature, *humidity, *heatindex;
       char temperature[10], humidity[10], heatindex[10];
       dtostrf(temp.READ(pin, level, TEMP), 3, 1, temperature);
       dtostrf(temp.READ(pin, level, HUM),  3, 1, humidity);
       dtostrf(temp.READ(pin, level, HEAT), 3, 1, heatindex);
       sprintf(return_str, "%s;%s;%s", temperature, humidity, heatindex);
-      Serial.println(return_str);
     }
   #else
     else if(strcmp(commands[0],"temp") == 0)
@@ -99,17 +97,19 @@ void ioclass::process(char* return_str)
     else if((strcmp(commands[0],"presbmp") == 0) || (strcmp(commands[0],"presbme") == 0))
     {
       bool sensor = strcmp(commands[0],"presbme") == 0 ? true : false;
-      char pressure[10], temperature[10], altitude[10], humidity[10], heatindex[10];
+      char pressure[10], temperature[10], altitude[10], humidity[10], heatindex[10], dewpoint[10];
 
       int units = atoi(commands[1]);
 
-      dtostrf(baro.READ(sensor, units, 1), 5, 3, pressure);    // kPa
-      dtostrf(baro.READ(sensor, units, 2), 3, 1, temperature); // °C or °F
-      dtostrf(baro.READ(sensor, units, 3), 1, 0, altitude);    // m
+      dtostrf(baro.READ(sensor, units, PRES), 5, 3, pressure);    // kPa
+      dtostrf(baro.READ(sensor, units, TEMP), 3, 1, temperature); // °C or °F
+      dtostrf(baro.READ(sensor, units, ALT), 1, 0, altitude);    // m
 
-      // Returns 0.0 if reading a BMP280 sensor, returns values for BME280 sensor
-      dtostrf(baro.READ(sensor, units, 4), 3, 1, humidity);    // %
-      dtostrf(baro.READ(sensor, units, 5), 3, 1, heatindex);   // °C or °F*/
+      // Returns 0.0 if reading on a BMP280 sensor
+      // Returns correct values for a BME280 sensor
+      dtostrf(baro.READ(sensor, units, HUM), 3, 1, humidity);    // %
+      dtostrf(baro.READ(sensor, units, HEAT), 3, 1, heatindex);   // °C or °F*/
+      dtostrf(baro.READ(sensor, units, DEW), 3, 1, dewpoint);   // °C or °F*/
 
       if(sensor)
         sprintf(return_str, "%s;%s;%s;%s;%s", pressure, temperature, altitude, humidity, heatindex);
@@ -125,12 +125,7 @@ void ioclass::process(char* return_str)
   // READ SINGLE TRACK GRAY CODE ENCODER
   #ifdef enable_stgc
     else if(strcmp(commands[0],"stgc") == 0)
-      {
-        char* reply_test = STGC.READ(atoi(commands[1]), atoi(commands[2]), atoi(commands[3]), atoi(commands[4]), atoi(commands[5]), atoi(commands[6]));
-        Serial.println(reply_test);
-
-        sprintf(return_str, "%s", reply_test);
-      }
+      sprintf(return_str, "%s", STGC.READ(atoi(commands[1]), atoi(commands[2]), atoi(commands[3]), atoi(commands[4]), atoi(commands[5]), atoi(commands[6])));
   #else
     else if(strcmp(commands[0],"stgc") == 0)
       dtostrf(ERROR_COMMAND_NOT_ACTIVATED, 4, 0, return_str);

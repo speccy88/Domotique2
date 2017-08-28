@@ -40,4 +40,6 @@
 #define TEMP 1
 #define HUM  2
 #define HEAT 3
-
+#define PRES 4
+#define ALT  5
+#define DEW  6
