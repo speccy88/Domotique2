@@ -1,0 +1,73 @@
+#include <Arduino.h>
+#include <stdlib.h>
+#include "misc.h"
+#include "parse.h"
+#include "string.h"
+#include "command_table.h"
+
+#include "error_codes.h"
+
+#define DEBUG
+
+void parseData(const char* stringData)
+{
+  int delimiters[NUMBER_OF_COMMANDS];
+  int delimiter_qty = 0;
+  
+  // Blank all string tables
+  for(int i=0; i<NUMBER_OF_COMMANDS; i++)
+    delimiters[i] = 0;
+
+  // Find all delimiters positions in received string
+  delimiter_qty = 0;
+  int lastIndex;
+  int newIndex;
+  for(int i=0; i<NUMBER_OF_COMMANDS; i++)
+  {
+    if(i==0)
+      delimiters[0] = getIndex(stringData, ':');
+    else 
+    {
+      lastIndex = delimiters[i-1]+1;
+      newIndex = getIndex(stringData+lastIndex, ':');
+      
+      if (newIndex == -1)
+        break;
+      else
+        delimiters[i] = lastIndex + newIndex;
+    }
+    
+    delimiter_qty += 1;
+  }
+  #ifdef DEBUG
+    Serial.print("Delimiter Quantity: ");
+    Serial.println(delimiter_qty);
+  #endif    
+  // Split and store data according to delimiters positions
+  int nextPosition;
+  int len;
+  for(int i=0; i<=delimiter_qty; i++)
+  {
+    if(i==0)
+    {
+      strncpy(command_ptr[0], stringData, delimiters[0]);         //stringData.substring(0, delimiters[i]);
+      command_ptr[0][delimiters[0]] = 0;
+    }
+    else if(i==delimiter_qty)
+      strcpy(command_ptr[i], stringData+delimiters[i-1]+1);      //stringData.substring(delimiters[i-1]+1);
+    else
+    {
+      nextPosition = delimiters[i-1]+1;
+      len = delimiters[i]-nextPosition;
+      strncpy(command_ptr[i], stringData+nextPosition, len);    //stringData.substring(delimiters[i-1]+1, delimiters[i]);
+      command_ptr[i][len] = 0;
+    }
+
+  #ifdef DEBUG
+    Serial.print("Command #");
+    Serial.print(i+1);
+    Serial.print(": ");
+    Serial.println(command_ptr[i]);
+  #endif    
+  }
+}
