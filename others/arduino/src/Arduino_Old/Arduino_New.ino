@@ -1,6 +1,6 @@
 #include <Arduino.h>   
 #include <EtherCard.h>                                                                 // Ethernet controller library
-#include <IPAddress.h>                                                                 // IPAddress controller library
+//#include <ip_address.h>                                                                 // IPAddress controller library
 #include <avr/wdt.h>                                                                   // Watchdog controller library
 #include "parse.h"
 
