@@ -4,10 +4,18 @@
 cd
 
 #Required executables and useful tools
-sudo apt-get -y install git vim htop couchdb python3 python3-pip
+sudo apt-get -y install git vim htop python3 python3-pip
 
 #Required Python 3 libraries
 sudo pip3 install tornado couchdb astral
+
+#Install CouchDB
+sudo apt-get --no-install-recommends -y install \
+    build-essential pkg-config erlang \
+    libicu-dev libmozjs185-dev libcurl4-openssl-dev
+
+wget http://mirror.its.dal.ca/apache/couchdb/source/2.1.1/apache-couchdb-2.1.1.tar.gz
+tar -xvf apache-couchdb-2.1.1.tar.gz
 
 #Allow CouchDB access from any IP address and restart the process
 sudo sed -i "/bind_address = 127.0.0.1/c\bind_address = 0.0.0.0" /etc/couchdb/default.ini
