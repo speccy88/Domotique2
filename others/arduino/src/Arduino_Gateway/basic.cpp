@@ -1,17 +1,18 @@
 #include <avr/io.h>
 #include "Arduino.h"
-#include "commands_arduino_basic.h"
-#include "error_codes.h"          // Includes error codes and pins definitions (min/max pin numbers)
-#include "command_table.h"
-
+#include "defines.h"
+#include "globals.h"
+#include "command_template.h"
+#include "basic.h"
 
 #define DEBUG
 
-Commands_Arduino_Basic::Commands_Arduino_Basic()
+Basic::Basic()
 {
+  name = "basic";
 }
 
-void Commands_Arduino_Basic::Process(char* return_str)
+void Basic::Process()
 {
   #ifdef DEBUG
     Serial.println("[PROCESS]");
@@ -32,26 +33,28 @@ void Commands_Arduino_Basic::Process(char* return_str)
 
   // FIRST COMPARISON ALWAYS FALSE - THIS ALLOWS TO DISABLE SUBROUTINES
   if(strcmp(command_ptr[0],"write") == 0)
-    dtostrf(this->Set(pin, level), 1, 0, return_str);
+    dtostrf(Set(pin, level), 1, 0, UDP_Reply_Buffer);
+  if(strcmp(command_ptr[0],"status") == 0)
+    dtostrf(Status(pin), 1, 0, UDP_Reply_Buffer);
   if(strcmp(command_ptr[0],"read") == 0)
-    dtostrf(this->Read(pin), 1, 0, return_str);
+    dtostrf(Read(pin), 1, 0, UDP_Reply_Buffer);
   if(strcmp(command_ptr[0],"analog") == 0)
-    dtostrf(this->Analog(pin), 1, 0, return_str);
+    dtostrf(Analog(pin), 1, 0, UDP_Reply_Buffer);
   if(strcmp(command_ptr[0],"pwm") == 0)
-    dtostrf(this->Pwm(pin, level), 1, 0, return_str);
+    dtostrf(Pwm(pin, level), 1, 0, UDP_Reply_Buffer);
   if(strcmp(command_ptr[0],"freq") == 0)
-    dtostrf(this->Freq(pin), 3, 1, return_str);
+    dtostrf(Freq(pin), 3, 1, UDP_Reply_Buffer);
   if(strcmp(command_ptr[0],"tone") == 0)
-    dtostrf(this->Tone(pin, level, duration, startstop), 3, 1, return_str);
+    dtostrf(Tone(pin, level, duration, startstop), 3, 1, UDP_Reply_Buffer);
 
 
   #ifdef DEBUG
     Serial.print("Return: ");
-    Serial.println(return_str);
+    Serial.println(UDP_Reply_Buffer);
   #endif
 }
 
-int Commands_Arduino_Basic::Set(int pin, unsigned int level)
+int Basic::Set(int pin, unsigned int level)
 {
     Serial.println("[Write]");
   if((dig_lo_min <= pin <= dig_lo_max) || (dig_hi_min <= pin <= dig_hi_max))
@@ -65,7 +68,7 @@ int Commands_Arduino_Basic::Set(int pin, unsigned int level)
     return(ERROR_INVALID_DIGITAL_PIN);
 }
 
-int Commands_Arduino_Basic::Read(int pin)
+int Basic::Read(int pin)
 {
   if((dig_lo_min <= pin <= dig_lo_max) || (dig_hi_min <= pin <= dig_hi_max))
   {
@@ -77,7 +80,17 @@ int Commands_Arduino_Basic::Read(int pin)
     return(ERROR_INVALID_DIGITAL_PIN);
 }
 
-int Commands_Arduino_Basic::Analog(int pin)
+int Basic::Status(int pin)
+{
+  if((dig_lo_min <= pin <= dig_lo_max) || (dig_hi_min <= pin <= dig_hi_max))
+  {
+    return(digitalRead(pin) ? 1 : 0);
+  }
+  else
+    return(ERROR_INVALID_DIGITAL_PIN);
+}
+
+int Basic::Analog(int pin)
 {
   if(pin <= analog_a0 && pin <= analog_a7)
     pin += 14;
@@ -90,7 +103,7 @@ int Commands_Arduino_Basic::Analog(int pin)
     return(ERROR_INVALID_ANALOGIN_PIN);
 }
 
-int Commands_Arduino_Basic::Pwm(int pin, unsigned int level)
+int Basic::Pwm(int pin, unsigned int level)
 {
   // Convert data from 0-100% to 0-255
   level = constrain(level, 0, 100);
@@ -105,7 +118,7 @@ int Commands_Arduino_Basic::Pwm(int pin, unsigned int level)
     return(ERROR_INVALID_PWM_PIN);
 }
 
-double Commands_Arduino_Basic::Freq(int pin)
+double Basic::Freq(int pin)
 {
   double Htime = 0;                                          //Integer for storing high time
   double Ltime = 0;                                          //Integer for storing low time
@@ -128,7 +141,7 @@ double Commands_Arduino_Basic::Freq(int pin)
     return(ERROR_INVALID_DIGITAL_PIN);
 }
 
-int Commands_Arduino_Basic::Tone(int pin, unsigned int level, unsigned long duration, int startstop)
+int Basic::Tone(int pin, unsigned int level, unsigned long duration, int startstop)
 {
   if((dig_lo_min <= pin <= dig_lo_max) || (dig_hi_min <= pin <= dig_hi_max))
   {

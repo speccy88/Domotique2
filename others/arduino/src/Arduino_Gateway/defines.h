@@ -1,3 +1,22 @@
+#ifndef DEFINES_H
+#define DEFINES_H
+
+#define MAX_LIBRARY_COUNT 5
+
+//Ethernet
+#define ETH_CS_PIN       10            // Chip select pin numper for ethernet shield
+#define UDP_REPLY_BUFLEN 50            // Define length of the reply string
+#define UDP_RECV_BUFLEN  200           // tcp/ip send and receive buffer
+#define UDP_LISTEN_PORT  5000          // Static port to listen
+
+//Commands
+#define NUMBER_OF_COMMANDS 10
+#define COMMAND_LENGTH 22
+
+//Options
+#define DEBUG
+//#define WDT
+
 // Define returned error codes
 #define OPERATION_SUCCESSFUL 9999                                                      //Reply "9999" means the command has been executed successfully
 #define OPERATION_FAILED 9998                                                          //Reply "9998" means the command has been executed successfully
@@ -43,3 +62,5 @@
 #define PRES 4
 #define ALT  5
 #define DEW  6
+
+#endif

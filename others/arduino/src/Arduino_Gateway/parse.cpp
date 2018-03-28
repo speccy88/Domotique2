@@ -1,13 +1,11 @@
 #include <Arduino.h>
 #include <stdlib.h>
-#include "misc.h"
+
+#include "defines.h"
+#include "globals.h"
 #include "parse.h"
+#include "misc.h"
 #include "string.h"
-#include "command_table.h"
-
-#include "error_codes.h"
-
-#define DEBUG
 
 void parseData(const char* stringData)
 {

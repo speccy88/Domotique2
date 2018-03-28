@@ -6,7 +6,7 @@ import select
 #List of constats for UDP socket communication
 UDP_IP = "192.168.1.95"
 UDP_SEND_PORT = 5000
-UDP_RECV_PORT = 1000
+UDP_RECV_PORT = 4000
 TIMEOUT_SECONDS = 3
 RECV_BUFFER_LEN = 200
 

@@ -1,9 +1,12 @@
 //misc.cpp
+#include "misc.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 
 #include "string.h"
 #include "math.h"
+
 
 int getIndex(const char* string, char toFind)
 {

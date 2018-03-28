@@ -1,22 +1,21 @@
 #include <EtherCard.h>                 // Ethernet controller library
 #include <IPAddress.h>                 // IPAddress controller library 
 #include <avr/wdt.h>                   // Watchdog controller library
+#include "defines.h"
+#include "command_template.h"
 #include "parse.h"
+#include "process.h"
+#include "basic.h"
 #include "main.h"
-#include "error_codes.h"               // Includes error codes and pins definitions (min/max pin numbers)
-#include "commands_arduino_basic.h"
 
-//Command table
-#define NUMBER_OF_COMMANDS 10
-#define COMMAND_LENGTH 22
+//globals definition
 char command_table[NUMBER_OF_COMMANDS][COMMAND_LENGTH];
 char (*command_ptr)[COMMAND_LENGTH] = (&command_table)[COMMAND_LENGTH];
+int command_index = 0;
 
 //Commands
-Commands_Arduino_Basic arduinoBasic = Commands_Arduino_Basic();
-
-#define DEBUG
-//#define WDT
+Basic arduinoBasic = Basic();
+CommandTemplate* Command_List[] = {&arduinoBasic};
 
 const byte ETH_IP_ADDRESS[] = { 192,168,1,95 };                     // Static IP Address (Set this to whatever IP you want
 const byte ETH_GATEWAY[]    = { 192,168,1,1 };                      // Static Gateway IP Address
@@ -85,7 +84,7 @@ void udpReceive(uint16_t dest_port, uint8_t src_ip[IP_LEN], uint16_t src_port, c
     Serial.println(command_ptr[2]);
   #endif
   //Call sub-functions
-  arduinoBasic.Process(UDP_Reply_Buffer);
+  process();
   
   //Reply
   UDPreply(src_port);
@@ -98,7 +97,6 @@ void UDPreply(uint16_t src_port)
     Serial.println(UDP_Reply_Buffer);
     Serial.print("Reply Length: ");
     Serial.println(strlen(UDP_Reply_Buffer));
-    Serial.println("Watchdog Reset...");
     Serial.println("Command Completed...");
     Serial.println("-----------------------------------------------------");
   #endif

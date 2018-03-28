@@ -9,4 +9,4 @@ build-uno/parse.cpp.o: parse.cpp \
  /usr/share/arduino/hardware/arduino//cores/arduino/Printable.h \
  /usr/share/arduino/hardware/arduino//cores/arduino/new.h \
  /usr/share/arduino/hardware/arduino//variants/standard/pins_arduino.h \
- misc.h parse.h command_table.h error_codes.h
+ defines.h globals.h basic.h command_template.h parse.h misc.h
