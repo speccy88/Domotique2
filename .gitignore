@@ -9,6 +9,10 @@ __pycache__/
 # C extensions
 *.so
 
+# JSON Web Token and password file
+*.jwt
+*.password
+
 # Distribution / packaging
 .Python
 env/

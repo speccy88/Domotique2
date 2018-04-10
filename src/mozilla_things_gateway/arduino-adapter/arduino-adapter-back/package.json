@@ -1,0 +1,38 @@
+{
+  "name": "arduino-adapter",
+  "version": "0.0.1",
+  "description": "Arduino UDP Ethernet ENC28J60",
+  "author": "Frederick Blais",
+  "main": "main.py",
+  "keywords": [
+    "mozilla",
+    "iot",
+    "adapter",
+    "arduino"
+  ],
+  "homepage": "https://github.com/",
+  "license": "MPL-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/"
+  },
+  "bugs": {
+    "url": "https://github.com/"
+  },
+  "files": [
+    "lib",
+    "main.py",
+    "pkg/__init__.py",
+    "pkg/arduino_adapter.py",
+    "pkg/arduino_device.py",
+    "pkg/arduino_property.py"
+  ],
+  "moziot": {
+    "api": {
+      "min": 1,
+      "max": 2
+    },
+    "plugin": true,
+    "exec": "python3 {path}/main.py"
+  }
+}
