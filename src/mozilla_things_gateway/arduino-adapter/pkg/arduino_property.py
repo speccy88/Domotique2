@@ -3,72 +3,72 @@ import socket
 import sys
 import time
 import select
+import logging
+
+logger = logging.getLogger('arduino-adapter')
 
 #List of constants for UDP socket communication
-UDP_IP = "192.168.1.95"
 UDP_SEND_PORT = 5000
-UDP_RECV_PORT = 4000
 TIMEOUT_SECONDS = 3
 RECV_BUFFER_LEN = 200
 
-
 #Standard send function
-def send(sock, msg):  
-    print("UDP target IP:", UDP_IP)
-    print("UDP target port:", UDP_SEND_PORT)
-    print("UDP listen port:", UDP_RECV_PORT)
-    print("Receive timeout : {}s".format(TIMEOUT_SECONDS))    
-    print("Sent command:", msg)
-
-    sock.sendto(msg.encode('utf-8'), (UDP_IP, UDP_SEND_PORT))
+def send(sock, ip, msg):  
+    sock.sendto(msg.encode('utf-8'), (ip, UDP_SEND_PORT))
     sock.settimeout(TIMEOUT_SECONDS)
-    
     try:
         recvmsg=sock.recv(RECV_BUFFER_LEN)
-        print("Reply:", recvmsg)
+        logger.info("Reply:", recvmsg)
+        return recvmsg
     
     except:
-        print("Timeout, no message received")
-
-    return recvmsg
+        logger.error("Timeout, no message received")
 
 class ArduinoProperty(Property):
-    def __init__(self, device, name, description, value):
+    def __init__(self, device, name, description):
         Property.__init__(self, device, name, description)
-        self.set_cached_value(value)
+        self.pin = device.pin
+        self.ip = device.ip
+        self.set_cached_value(True)
 
-
-class ArduinoPlugProperty(ArduinoProperty):
+class ArduinoDigitalOutputProperty(ArduinoProperty):
     def set_value(self, value):
-        self.set_cached_value(value)
-        self.device.notify_property_changed(self)
-
-    def update(self, value):
-        if value != self.value:
-            self.set_cached_value(value)
-            self.device.notify_property_changed(self)
-
-class ArduinoBulbProperty(ArduinoProperty):
-    def set_value(self, value):
-        print("set value + "+str(value))
+        logger.info("set value + "+str(value))
         #Create and bind socket    
         sock = socket.socket(socket.AF_INET, # Internet
                     socket.SOCK_DGRAM) # UDP
 
         if value:
-            MESSAGE = 'write:3:1'
+            MESSAGE = 'write:'+str(self.pin)+':1'
         else:
-            MESSAGE = 'write:3:0'
+            MESSAGE = 'write:'+str(self.pin)+':0'
 
-        print(MESSAGE)
-        retval = send(sock, MESSAGE)
-        print("Return value: "+str(retval))
+        logger.info(MESSAGE)
+        retval = send(sock, self.ip, MESSAGE)
+        logger.info("Return value: "+str(retval))
         sock.close()
         self.set_cached_value(value)
         self.device.notify_property_changed(self)
-        print("EXIT")
-    
-    def update(self, value):
-        if value != self.value:
-            self.set_cached_value(value)
-            self.device.notify_property_changed(self)
+        logger.info("EXIT")
+
+class ArduinoDigitalInputProperty(ArduinoProperty):
+    def update(self):
+        logger.info("in self.update before socket")
+        sock = socket.socket(socket.AF_INET, # Internet
+                    socket.SOCK_DGRAM) # UDP
+
+        MESSAGE = 'status:'+str(self.pin)
+        logger.info(MESSAGE)
+        retval = send(sock, self.ip, MESSAGE)
+        logger.info("Return value: "+str(retval))
+        
+        sock.close()
+        if retval == b'1':
+            value = True
+            logger.info(value)
+        else:
+            value = False
+            logger.info(value)
+        self.set_cached_value(value)
+        self.device.notify_property_changed(self)
+        logger.info("EXIT")

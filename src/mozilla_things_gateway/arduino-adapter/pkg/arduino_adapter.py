@@ -1,10 +1,13 @@
 from gateway_addon import Adapter
+from .arduino_device import ArduinoDigitalInput, ArduinoDigitalOutput
+import logging
 
-from .arduino_device import ArduinoBulb, ArduinoPlug
-
-
-_TIMEOUT = 3
-
+logger = logging.getLogger('arduino-adapter')
+hdlr = logging.FileHandler('/var/tmp/arduino.log')
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+hdlr.setFormatter(formatter)
+logger.addHandler(hdlr) 
+logger.setLevel(logging.INFO)
 
 class ArduinoAdapter(Adapter):
     def __init__(self, verbose=False):
@@ -14,18 +17,9 @@ class ArduinoAdapter(Adapter):
                          'arduino-adapter',
                          verbose=verbose)
 
-        self.pairing = False
-        self.start_pairing(_TIMEOUT)
-
-    def start_pairing(self, timeout):
-        self.pairing = True
-
-        id = 'test device Fred'
-        #device = ArduinoPlug(self, id)
-        device = ArduinoBulb(self, id)
-        self.handle_device_added(device)
-        self.pairing = False
-
-
-    def cancel_pairing(self):
-        self.pairing = False
+        self.handle_device_added(ArduinoDigitalOutput(self, "RED_LED1", "192.168.1.95", 3))
+        self.handle_device_added(ArduinoDigitalOutput(self, "BLUE_LED1", "192.168.1.95", 5))
+        self.handle_device_added(ArduinoDigitalInput(self, "BUTTON1", "192.168.1.95", 3))
+        self.handle_device_added(ArduinoDigitalOutput(self, "RED_LED2", "192.168.1.90", 3))
+        self.handle_device_added(ArduinoDigitalOutput(self, "BLUE_LED2", "192.168.1.90", 5))
+        self.handle_device_added(ArduinoDigitalInput(self, "BUTTON2", "192.168.1.90", 3))

@@ -17,14 +17,15 @@ int command_index = 0;
 Basic arduinoBasic = Basic();
 CommandTemplate* Command_List[] = {&arduinoBasic};
 
-const byte ETH_IP_ADDRESS[] = { 192,168,1,95 };                     // Static IP Address (Set this to whatever IP you want
+const byte ETH_IP_ADDRESS[] = { 192,168,1,90 };                     // Static IP Address (Set this to whatever IP you want
 const byte ETH_GATEWAY[]    = { 192,168,1,1 };                      // Static Gateway IP Address
 const byte ETH_SUBNET[]     = { 255,255,255,0 };                    // Static Subnet Mask
-const byte MAC_ADDRESS[]    = { 0xFF,0xFF,0xFF,0xFF,0xFF,0x02 };    // Static MAC Address - MUST NOT have 2 identical MAC address on same network
+const byte MAC_ADDRESS[]    = { 0xFF,0xFF,0xFF,0xFF,0xFF,0x03 };    // Static MAC Address - MUST NOT have 2 identical MAC address on same network
 
 //First time setup
 void setup()
 {
+
   #ifdef WDT
     wdt_enable(WDTO_8S);
   #else

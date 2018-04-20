@@ -1,44 +1,41 @@
+from .arduino_property import ArduinoDigitalOutputProperty, ArduinoDigitalInputProperty
 from gateway_addon import Device
 import gateway_addon
 import threading
 import time
+import logging
+logger = logging.getLogger('arduino-adapter')
 
-from .arduino_property import ArduinoBulbProperty, ArduinoPlugProperty
-
-_POLL_INTERVAL = 5
+_POLL_INTERVAL = 1
 
 class ArduinoDevice(Device):
-    def __init__(self, adapter, _id):
+    def __init__(self, adapter, _id, ip_address, pin):
         Device.__init__(self, adapter, _id)
 
-        self.description = _id+" desc"
-        self.name = _id+" name"
+        self.description = "Arduino device"
+        self.name = _id
+        self.pin = pin
+        self.ip = ip_address
 
+class ArduinoDigitalOutput(ArduinoDevice):
+    def __init__(self, adapter, _id, ip_address, pin):
+        ArduinoDevice.__init__(self, adapter, _id, ip_address, pin)
+        self.type = 'onOffLight'
+        self.properties['on'] = ArduinoDigitalOutputProperty(self,'on',{'type': 'boolean'})
+
+class ArduinoDigitalInput(ArduinoDevice):
+    def __init__(self, adapter, _id, ip_address, pin):
+        ArduinoDevice.__init__(self, adapter, _id, ip_address, pin)
+        self.type = 'binarySensor'
+        self.properties['on'] = ArduinoDigitalInputProperty(self,'on',{'type': 'boolean'})
+        
         t = threading.Thread(target=self.poll)
         t.daemon = True
         t.start()
 
-class ArduinoPlug(ArduinoDevice):
-    def __init__(self, adapter, _id):
-        ArduinoDevice.__init__(self, adapter, _id)
-        self.type = 'onOffSwitch'
-        self.properties['on'] = ArduinoPlugProperty(self, 'on', {'type': 'boolean'}, True)
-
     def poll(self):
         while True:
-            time.sleep(_POLL_INTERVAL)
-            state = True
-            for prop in self.properties.values():
-                prop.update(state)
-
-class ArduinoBulb(ArduinoDevice):
-    def __init__(self, adapter, _id):
-        ArduinoDevice.__init__(self, adapter, _id)
-        state = True
-        self.type = 'onOffLight'
-        self.properties['on'] = ArduinoBulbProperty(self,'on',{'type': 'boolean'},True)
-
-    def poll(self):
-        while True:
+            logger.info("update inside poll")
+            self.properties['on'].update()
             time.sleep(_POLL_INTERVAL)
 
